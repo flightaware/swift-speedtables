@@ -23,34 +23,46 @@ class SLNode<Key: protocol<Comparable>, Value> {
     var value: Value?
     var level: Int
     var next: [SLNode<Key, Value>?]
-    init(_ key: Key?, value: Value? = nil, maxLevel: Int, level: Int = 0, tail: SLNode<Key, Value>? = nil) {
+    init(_ key: Key?, value: Value? = nil, maxLevel: Int, level: Int = 0) {
         self.key = key
         self.value = value
         self.level = (level > 0) ? level : SLrandomLevel(maxLevel)
-        self.next = Array<SLNode<Key, Value>?>(count: maxLevel, repeatedValue: tail)
+        self.next = Array<SLNode<Key, Value>?>(count: maxLevel, repeatedValue: nil)
     }
 }
 
 class SkipList<Key: protocol<Comparable>, Value> {
     let head: SLNode<Key, Value>
-    let tail: SLNode<Key, Value>
     var maxLevel: Int
     var level: Int
-    init(maxLevel: Int, largerThanMaxKey: Key) {
+    
+    init(maxLevel: Int) {
         self.maxLevel = maxLevel
         self.level = 1
-        self.tail = SLNode<Key, Value>(largerThanMaxKey, maxLevel: maxLevel, level: maxLevel, tail: nil)
-        self.head = SLNode<Key, Value>(nil, maxLevel: maxLevel, level: maxLevel, tail: tail)
+        self.head = SLNode<Key, Value>(nil, maxLevel: maxLevel, level: maxLevel)
+    }
+    
+    convenience init(maxNodes: Int) {
+        let logMaxNodes = Int(round(log(Double(maxNodes)) / log(1 / randomProbability)))
+        self.init(maxLevel: logMaxNodes)
     }
 
     func search(searchKey: Key) -> SLNode<Key, Value>? {
         var x = head
         
+        // look for the key
         for i in (1 ... self.level).reverse() {
-            while x.next[i-1]!.key < searchKey {
+            while x.next[i-1] != nil && x.next[i-1]!.key < searchKey {
                 x = x.next[i-1]!
             }
         }
+        
+        // have we run off the end?
+        guard x.next[0] != nil else {
+            return nil
+        }
+
+        // no, are we looking at a valis node?
         x = x.next[0]!
         if x.key == searchKey {
             return x
@@ -71,59 +83,88 @@ class SkipList<Key: protocol<Comparable>, Value> {
     func insert(searchKey: Key, value newValue: Value) {
         var update: [Int: SLNode<Key, Value>] = [:]
         var x = head
-        for i in (1 ... level).reverse() {
-            while x.next[i-1]!.key < searchKey {
+        
+        // look for the key, and save the previous nodes all the way down in the update[] list
+        for i in (1 ... self.level).reverse() {
+            while x.next[i-1] != nil && x.next[i-1]!.key < searchKey {
                 x = x.next[i-1]!
             }
             update[i] = x
         }
-        x = x.next[0]!
-        if x.key == searchKey {
-            x.value = newValue
-        } else {
-            let level = SLrandomLevel(maxLevel)
-            if level > self.level {
-                for i in self.level ... level {
-                    update[i] = self.head
-                }
-                self.level = level
-            }
-            let newNode = SLNode<Key, Value>(searchKey, value: newValue, maxLevel: maxLevel, level: level, tail: tail)
-            for i in 1 ... level {
-                newNode.next[i-1] = update[i]!.next[i-1]
-                update[i]!.next[i-1] = newNode
+        
+        // If we haven't run off the end, and we're looking at the right key already,
+        // then there's nothing to insert. Just set the new value.
+        if x.next[0] != nil {
+            if x.next[0]!.key == searchKey {
+                x.value = newValue
+                return
             }
         }
+        
+        // Pick a random level for the new node
+        let level = SLrandomLevel(maxLevel)
+        
+        // If the new node is higher than the current level, fill up the update[] list
+        // with head
+        if level > self.level {
+            for i in self.level ... level {
+                update[i] = self.head
+            }
+            self.level = level
+        }
+        
+        // make a new node and patch it in to the saved nodes in the update[] list
+        let newNode = SLNode<Key, Value>(searchKey, value: newValue, maxLevel: maxLevel, level: level)
+        for i in 1 ... level {
+            newNode.next[i-1] = update[i]!.next[i-1]
+            update[i]!.next[i-1] = newNode
+        }
     }
+    
     func delete(searchKey: Key) -> Value? {
         var update: [Int: SLNode<Key, Value>] = [:]
         var x = head
         var oldValue: Value? = nil
+        
+        // look for the key, and save the previous nodes all the way down in the update[] list
         for i in (1 ... level).reverse() {
-            while x.next[i-1]!.key < searchKey {
+            while x.next[i-1] != nil && x.next[i-1]!.key < searchKey {
                 x = x.next[i-1]!
             }
             update[i] = x
         }
+        
+        // check if run off end of list, nothing to do
+        guard x.next[0] != nil else {
+            return nil
+        }
+
+        // Point to the node we're maybe going to delete, if it matches
         x = x.next[0]!
         if x.key == searchKey {
-            oldValue = x.value
+            oldValue = x.value // remember to return this
+            
+            // point all the previous node to the new next node
             for i in 1 ... self.level {
                 if update[i]!.next[i-1]! !== x {
                     break
                 }
                 update[i]!.next[i-1] = x.next[i-1]
             }
-            while self.level > 1 && self.head.next[self.level]! === self.tail {
+            
+            // if that was the biggest node, and we can see the end of the list from the head,
+            // lower the list until we're pointing at a node
+            while self.level > 1 && self.head.next[self.level] == nil {
                 self.level -= 1
             }
         }
         return oldValue
     }
+    
     func toArray() -> [(Key, Value?)] {
         var a: [(Key, Value?)] = []
         var x = head
-        while x.next[0] !== tail {
+        while x.next[0] != nil {
             x = x.next[0]!
             a += [(x.key!, x.value)]
         }

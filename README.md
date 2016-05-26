@@ -52,6 +52,6 @@ for row in table.nameIndex.search(equal: myName) {
 
 Anticipated operations include search(equal: exactValue), search(min: min, max: max), search(in: [value, value, value])...
 
-Searches are not initially going to be transcationalized, modifying the indexed value or inserting or deleting rows in a search is not supported.
+Searches are not initially going to be transactionalized, modifying the indexed value or inserting or deleting rows in a search is not supported.
 
 Keys will be duplicated in the table. If the key is a mutable type, changing the key through a mutating function will not change the index... you will have to delete before the change and re-insert afterwards.

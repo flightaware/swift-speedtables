@@ -10,11 +10,16 @@ import Foundation
 
 print("Hello, World!")
 
-let l = SkipList<String, String>(maxLevel: 6, largerThanMaxKey: "zzzzzzzzzz")
+let l = SkipList<String, String>(maxLevel: 6)
 
 l.insert("hello", value: "I say hello")
 l.insert("goodbye", value: "You say goodbye")
-if let hello: String = l.search("hello") {
+l.insert("hello", value: "Hello my baby")
+l.insert("hello", value: "Hello my honey")
+l.insert("hello", value: "Hello my ragtime gal")
+l.insert("goodbye", value: "Goodnight America, and all the ships at sea")
+let hellos: [String] = l.search("hello")
+for hello in hellos {
     print("hello is '\(hello)'")
 }
 print(l.toArray())
@@ -26,8 +31,16 @@ l.insert("stop", value: "You say stop")
 l.insert("go", value: "I say go go go")
 
 print(l.toArray())
-print("Delete high = '\(l.delete("high"))'")
-print("Delete low = '\(l.delete("low"))'")
+func delete_all(l: SkipList<String, String>, key: String) {
+    for val in l.search(key) {
+        print("Deleting \((key, val))")
+        l.delete(key, searchValue: val)
+    }
+}
+
+delete_all(l, key: "high")
+delete_all(l, key: "low")
+delete_all(l, key: "goodbye")
 
 print(l.toArray())
 

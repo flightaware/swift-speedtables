@@ -18,20 +18,20 @@ func SLrandomLevel(maxLevel: Int) -> Int {
     return newLevel
 }
 
-class SLNode<Key: protocol<Comparable>, Value> {
+class SLNode<Key: protocol<Comparable>, Value: protocol<Comparable>> {
     let key: Key?
-    var value: Value?
+    var values: [Value]
     var level: Int
     var next: [SLNode<Key, Value>?]
     init(_ key: Key?, value: Value? = nil, maxLevel: Int, level: Int = 0) {
         self.key = key
-        self.value = value
+        self.values = (value == nil) ? [] : [value!]
         self.level = (level > 0) ? level : SLrandomLevel(maxLevel)
         self.next = Array<SLNode<Key, Value>?>(count: maxLevel, repeatedValue: nil)
     }
 }
 
-class SkipList<Key: protocol<Comparable>, Value> {
+class SkipList<Key: protocol<Comparable>, Value: protocol<Comparable>> {
     let head: SLNode<Key, Value>
     var maxLevel: Int
     var level: Int
@@ -62,7 +62,7 @@ class SkipList<Key: protocol<Comparable>, Value> {
             return nil
         }
 
-        // no, are we looking at a valis node?
+        // no, are we looking at a valid node?
         x = x.next[0]!
         if x.key == searchKey {
             return x
@@ -71,12 +71,12 @@ class SkipList<Key: protocol<Comparable>, Value> {
         }
     }
     
-    func search(searchKey: Key) -> Value? {
+    func search(searchKey: Key) -> [Value] {
         let x: SLNode<Key, Value>? = search(searchKey)
-        if let u = x?.value {
-            return u
+        if let array = x?.values {
+            return array
         } else {
-            return nil
+            return []
         }
     }
     
@@ -92,11 +92,19 @@ class SkipList<Key: protocol<Comparable>, Value> {
             update[i] = x
         }
         
-        // If we haven't run off the end, and we're looking at the right key already,
-        // then there's nothing to insert. Just set the new value.
+        // If we haven't run off the end...
         if x.next[0] != nil {
-            if x.next[0]!.key == searchKey {
-                x.value = newValue
+            x = x.next[0]!
+            
+            // If we're looking at the right key already, then there's nothing to insert. Just add
+            // the new value to the values array.
+            if x.key == searchKey {
+                for i in 0 ..< x.values.count {
+                    if newValue == x.values[i] {
+                        return
+                    }
+                }
+                x.values += [newValue]
                 return
             }
         }
@@ -121,10 +129,9 @@ class SkipList<Key: protocol<Comparable>, Value> {
         }
     }
     
-    func delete(searchKey: Key) -> Value? {
+    func delete(searchKey: Key, searchValue: Value) -> Bool {
         var update: [Int: SLNode<Key, Value>] = [:]
         var x = head
-        var oldValue: Value? = nil
         
         // look for the key, and save the previous nodes all the way down in the update[] list
         for i in (1 ... level).reverse() {
@@ -136,37 +143,61 @@ class SkipList<Key: protocol<Comparable>, Value> {
         
         // check if run off end of list, nothing to do
         guard x.next[0] != nil else {
-            return nil
+            return false
         }
-
+        
         // Point to the node we're maybe going to delete, if it matches
         x = x.next[0]!
-        if x.key == searchKey {
-            oldValue = x.value // remember to return this
-            
-            // point all the previous node to the new next node
-            for i in 1 ... self.level {
-                if update[i]!.next[i-1]! !== x {
-                    break
-                }
-                update[i]!.next[i-1] = x.next[i-1]
-            }
-            
-            // if that was the biggest node, and we can see the end of the list from the head,
-            // lower the list until we're pointing at a node
-            while self.level > 1 && self.head.next[self.level] == nil {
-                self.level -= 1
+        
+        // Look for a key match
+        if x.key != searchKey {
+            return false
+        }
+        
+        // look for match in values
+        var foundIndex = -1
+        for i in 0..<x.values.count {
+            if x.values[i] == searchValue {
+                foundIndex = i
             }
         }
-        return oldValue
+        
+        // If we didn't find a matching value, we didn't actually find a match
+        if(foundIndex == -1) {
+            return false
+        }
+        
+        // Remove the value we found, and if it wasn't the last one return success
+        x.values.removeAtIndex(foundIndex)
+        if(x.values.count > 0) {
+            return true
+        }
+
+        // Now we've found a value, deleted it, and emptied the values list, we can selete this whole entry
+
+        // point all the previous node to the new next node
+        for i in 1 ... self.level {
+            if update[i]!.next[i-1]! !== x {
+                break
+            }
+            update[i]!.next[i-1] = x.next[i-1]
+        }
+            
+        // if that was the biggest node, and we can see the end of the list from the head,
+        // lower the list until we're pointing at a node
+        while self.level > 1 && self.head.next[self.level] == nil {
+            self.level -= 1
+        }
+        
+        return true
     }
     
-    func toArray() -> [(Key, Value?)] {
-        var a: [(Key, Value?)] = []
+    func toArray() -> [(Key, [Value])] {
+        var a: [(Key, [Value])] = []
         var x = head
         while x.next[0] != nil {
             x = x.next[0]!
-            a += [(x.key!, x.value)]
+            a += [(x.key!, x.values)]
         }
         return a
     }

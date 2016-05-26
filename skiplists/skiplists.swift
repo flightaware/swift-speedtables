@@ -43,7 +43,7 @@ class SkipList<T: Comparable, U> {
         self.head = SLNode<T, U>(nil, maxLevel: maxLevel, level: maxLevel, tail: tail)
     }
 
-    func Search(searchKey: T) -> SLNode<T, U>? {
+    func search(searchKey: T) -> SLNode<T, U>? {
         var x = head
         
         for i in maxLevel ... 1 {
@@ -59,8 +59,8 @@ class SkipList<T: Comparable, U> {
         }
     }
     
-    func Search(searchKey: T) -> U? {
-        let x: SLNode<T, U>? = Search(searchKey)
+    func search(searchKey: T) -> U? {
+        let x: SLNode<T, U>? = search(searchKey)
         if let u = x?.value {
             return u
         } else {
@@ -68,7 +68,7 @@ class SkipList<T: Comparable, U> {
         }
     }
     
-    func Insert(searchKey: T, newValue: U) {
+    func insert(searchKey: T, newValue: U) {
         var update: [SLNode<T, U>] = []
         var x = head
         for i in level ... 1 {
@@ -92,6 +92,28 @@ class SkipList<T: Comparable, U> {
             for i in 1 ... level {
                 newNode.next[i] = update[i].next[i]
                 update[i].next[i] = newNode
+            }
+        }
+    }
+    func delete(searchKey: T) {
+        var update: [SLNode<T, U>] = []
+        var x = head
+        for i in level ... 1 {
+            while x.next[i]!.key < searchKey {
+                x = x.next[i]!
+            }
+            update[i] = x
+        }
+        x = x.next[1]!
+        if x.key == searchKey {
+            for i in 1 ... self.level {
+                if update[i].next[i]! !== x {
+                    break
+                }
+                update[i].next[i] = x.next[i]
+            }
+            while self.level > 1 && self.head.next[self.level]! === self.tail {
+                self.level -= 1
             }
         }
     }

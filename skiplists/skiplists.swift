@@ -69,7 +69,7 @@ class SkipList<T: Comparable, U> {
     }
     
     func Insert(searchKey: T, newValue: U) {
-        var update = [SLNode<T, U>?](count: maxLevel, repeatedValue: head)
+        var update: [SLNode<T, U>] = []
         var x = head
         for i in level ... 1 {
             while x.next[i]!.key < searchKey {
@@ -83,13 +83,15 @@ class SkipList<T: Comparable, U> {
         } else {
             let level = SLrandomLevel(maxLevel)
             if level > self.level {
-                // We don't need to set update[self.level+1 ... level] to head because it's initialized to head
+                for i in self.level ... level {
+                    update[i] = self.head
+                }
                 self.level = level
             }
             let newNode = SLNode<T, U>(searchKey, maxLevel: maxLevel, level: level, tail: tail)
             for i in 1 ... level {
-                newNode.next[i] = update[i]!.next[i]
-                update[i]!.next[i] = newNode
+                newNode.next[i] = update[i].next[i]
+                update[i].next[i] = newNode
             }
         }
     }

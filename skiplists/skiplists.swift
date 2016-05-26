@@ -18,32 +18,32 @@ func SLrandomLevel(maxLevel: Int) -> Int {
     return newLevel
 }
 
-class SLNode<T: protocol<Comparable>, U> {
-    let key: T?
-    var value: U?
+class SLNode<Key: protocol<Comparable>, Value> {
+    let key: Key?
+    var value: Value?
     var level: Int
-    var next: [SLNode<T, U>?]
-    init(_ key: T?, value: U? = nil, maxLevel: Int, level: Int = 0, tail: SLNode<T, U>? = nil) {
+    var next: [SLNode<Key, Value>?]
+    init(_ key: Key?, value: Value? = nil, maxLevel: Int, level: Int = 0, tail: SLNode<Key, Value>? = nil) {
         self.key = key
         self.value = value
         self.level = (level > 0) ? level : SLrandomLevel(maxLevel)
-        self.next = Array<SLNode<T, U>?>(count: maxLevel, repeatedValue: tail)
+        self.next = Array<SLNode<Key, Value>?>(count: maxLevel, repeatedValue: tail)
     }
 }
 
-class SkipList<T: protocol<Comparable>, U> {
-    let head: SLNode<T, U>
-    let tail: SLNode<T, U>
+class SkipList<Key: protocol<Comparable>, Value> {
+    let head: SLNode<Key, Value>
+    let tail: SLNode<Key, Value>
     var maxLevel: Int
     var level: Int
-    init(maxLevel: Int, largerThanMaxKey: T) {
+    init(maxLevel: Int, largerThanMaxKey: Key) {
         self.maxLevel = maxLevel
         self.level = 1
-        self.tail = SLNode<T, U>(largerThanMaxKey, maxLevel: maxLevel, level: maxLevel, tail: nil)
-        self.head = SLNode<T, U>(nil, maxLevel: maxLevel, level: maxLevel, tail: tail)
+        self.tail = SLNode<Key, Value>(largerThanMaxKey, maxLevel: maxLevel, level: maxLevel, tail: nil)
+        self.head = SLNode<Key, Value>(nil, maxLevel: maxLevel, level: maxLevel, tail: tail)
     }
 
-    func search(searchKey: T) -> SLNode<T, U>? {
+    func search(searchKey: Key) -> SLNode<Key, Value>? {
         var x = head
         
         for i in (1 ... self.level).reverse() {
@@ -59,8 +59,8 @@ class SkipList<T: protocol<Comparable>, U> {
         }
     }
     
-    func search(searchKey: T) -> U? {
-        let x: SLNode<T, U>? = search(searchKey)
+    func search(searchKey: Key) -> Value? {
+        let x: SLNode<Key, Value>? = search(searchKey)
         if let u = x?.value {
             return u
         } else {
@@ -68,8 +68,8 @@ class SkipList<T: protocol<Comparable>, U> {
         }
     }
     
-    func insert(searchKey: T, value newValue: U) {
-        var update: [Int: SLNode<T, U>] = [:]
+    func insert(searchKey: Key, value newValue: Value) {
+        var update: [Int: SLNode<Key, Value>] = [:]
         var x = head
         for i in (1 ... level).reverse() {
             while x.next[i-1]!.key < searchKey {
@@ -88,17 +88,17 @@ class SkipList<T: protocol<Comparable>, U> {
                 }
                 self.level = level
             }
-            let newNode = SLNode<T, U>(searchKey, value: newValue, maxLevel: maxLevel, level: level, tail: tail)
+            let newNode = SLNode<Key, Value>(searchKey, value: newValue, maxLevel: maxLevel, level: level, tail: tail)
             for i in 1 ... level {
                 newNode.next[i-1] = update[i]!.next[i-1]
                 update[i]!.next[i-1] = newNode
             }
         }
     }
-    func delete(searchKey: T) -> U? {
-        var update: [Int: SLNode<T, U>] = [:]
+    func delete(searchKey: Key) -> Value? {
+        var update: [Int: SLNode<Key, Value>] = [:]
         var x = head
-        var oldValue: U? = nil
+        var oldValue: Value? = nil
         for i in (1 ... level).reverse() {
             while x.next[i-1]!.key < searchKey {
                 x = x.next[i-1]!
@@ -120,8 +120,8 @@ class SkipList<T: protocol<Comparable>, U> {
         }
         return oldValue
     }
-    func toArray() -> [(T, U?)] {
-        var a: [(T, U?)] = []
+    func toArray() -> [(Key, Value?)] {
+        var a: [(Key, Value?)] = []
         var x = head
         while x.next[0] !== tail {
             x = x.next[0]!

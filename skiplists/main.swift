@@ -47,11 +47,45 @@ delete_all(l, key: "goodbye")
 print(l.toArray())
 
 let t = Table(size: 100)
-t.create("Nick", age: 32)
-t.create("Judy", age: 22)
-t.create("chip", age: 5)
-t.create("dale", age: 5)
+t.insert("Nick", age: 32)
+t.insert("Judy", age: 22)
+t.insert("chip", age: 5)
+t.insert("dale", age: 5)
 for row in t.ageIndex.search(5) {
     print("Name: \(row.name), age: \(row.age)")
 }
+let chips: [TableRow] = t.nameIndex.search("chip")
+if(chips.count == 1) {
+    chips[0].age = 6
+} else {
+    print("OOPS! chips.count(\(chips.count)) should be 1")
+}
+t.insert("gadget", age: 5)
+t.insert("monty", age: 8)
+t.insert("happy", age: 500)
+t.insert("sleepy", age: 500)
+t.insert("grumpy", age: 500)
+t.insert("lestat", age: 500)
+t.insert("dracula", age: 500)
+t.insert("dracula", age: 80)
+t.insert("dracula", age: 120)
+for row in t.ageIndex.search(500) {
+    print("Deleting impossible entry \(row.name), \(row.age)")
+    t.delete(row)
+}
+print("Walking nameIndex:")
+for (key, rows) in t.nameIndex.toArray() {
+    print("  Key: \(key)")
+    for row in rows {
+        print("    Name: \(row.name), age: \(row.age)")
+    }
+}
+print("Walking ageIndex:")
+for (key, rows) in t.ageIndex.toArray() {
+    print("Key: \(key)")
+    for row in rows {
+        print("    Name: \(row.name), age: \(row.age)")
+    }
+}
+
 

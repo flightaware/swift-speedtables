@@ -15,10 +15,10 @@ class Table: SpeedTable {
         nameIndex = SkipList<String, TableRow>(maxLevel: size)
         ageIndex = SkipList<Int, TableRow>(maxLevel: size)
     }
-    func create(name: String, age: Int, school: String? = nil) -> TableRow{
+    func insert(name: String, age: Int, school: String? = nil) -> TableRow{
         return TableRow(parent: self, name: name, age: age, school: school)
     }
-    func destroy(row: TableRow) {
+    func delete(row: TableRow) {
         self.nameIndex.delete(row.name, value: row)
         self.ageIndex.delete(row.age, value: row)
     }

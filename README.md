@@ -4,39 +4,39 @@ This is a work in progress. The goal of this project is to create a multi-way in
 
 ```swift
 class Table: SpeedTable {
-	let nameIndex: Skiplist<String, TableRow>
-	let ageIndex: Skiplist<Int, TableRow>
-	init(size: Int) {
-		nameIndex = Skiplist<String, TableRow>(size)>
-		ageIndex = Skiplist<Int, TableRow>(size)>
-	}
-	func create(name: String, age: Int, school: string = nil) -> TableRow{
-		return TableRow(parent: self, name: name, age: age, school: school)
-	}
-	func destroy(row: TableRow) {
-		row.nameIndex.delete(row.name, row)
-		row.ageIndex.delete(row.age, row)
-	}
+    let nameIndex: SkipList<String, TableRow>
+    let ageIndex: SkipList<Int, TableRow>
+    init(size: Int) {
+        nameIndex = SkipList<String, TableRow>(size)
+        ageIndex = SkipList<Int, TableRow>(size)
+    }
+    func create(name: String, age: Int, school: String? = nil) -> TableRow{
+        return TableRow(parent: self, name: name, age: age, school: school)
+    }
+    func destroy(row: TableRow) {
+        row.nameIndex.delete(row.name, row)
+        row.ageIndex.delete(row.age, row)
+    }
 }
 
 class TableRow: SpeedTableRow {
-	let parent: Table
-	var name: String {
-		willSet { parent.nameIndex.delete(name, self) }
-		didSet { parent.nameIndex.insert(name, self) }
-	}
-	var age: Int {
-		willSet { parent.ageIndex.delete(age, self) }
-		didSet { parent.ageIndex.insert(age, self) }
-	}
-	var school: String? // Unindexed value
-	init(parent: Table, name: String, age: Int, school: string = nil) {
-		self.parent=parent
-		self.name = name
-		parent.nameIndex.insert(self.name, self)
-		self.age = age
-		parent.ageIndex.insert(self.age, self)
-	}
+    let parent: Table
+    var name: String {
+        willSet { parent.nameIndex.delete(name, self) }
+        didSet { parent.nameIndex.insert(name, self) }
+    }
+    var age: Int {
+        willSet { parent.ageIndex.delete(age, self) }
+        didSet { parent.ageIndex.insert(age, self) }
+    }
+    var school: String? // Unindexed value
+    init(parent: Table, name: String, age: Int, school: String? = nil) {
+        self.parent=parent
+        self.name = name
+        parent.nameIndex.insert(self.name, self)
+        self.age = age
+        parent.ageIndex.insert(self.age, self)
+    }
 }
 ```
 

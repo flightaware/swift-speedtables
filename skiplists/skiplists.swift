@@ -177,7 +177,7 @@ class SkipList<Key: protocol<Comparable>, Value: protocol<Equatable>> {
 
         // point all the previous node to the new next node
         for i in 1 ... self.level {
-            if update[i]!.next[i-1]! !== x {
+            if update[i]!.next[i-1] != nil && update[i]!.next[i-1]! !== x {
                 break
             }
             update[i]!.next[i-1] = x.next[i-1]

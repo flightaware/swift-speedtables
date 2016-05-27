@@ -47,12 +47,12 @@ class SkipList<Key: protocol<Comparable>, Value: protocol<Equatable>> {
         self.init(maxLevel: logMaxNodes)
     }
 
-    func search(searchKey: Key) -> SLNode<Key, Value>? {
+    func search(key: Key) -> SLNode<Key, Value>? {
         var x = head
         
         // look for the key
         for i in (1 ... self.level).reverse() {
-            while x.next[i-1] != nil && x.next[i-1]!.key < searchKey {
+            while x.next[i-1] != nil && x.next[i-1]!.key < key {
                 x = x.next[i-1]!
             }
         }
@@ -64,15 +64,15 @@ class SkipList<Key: protocol<Comparable>, Value: protocol<Equatable>> {
 
         // no, are we looking at a valid node?
         x = x.next[0]!
-        if x.key == searchKey {
+        if x.key == key {
             return x
         } else {
             return nil
         }
     }
     
-    func search(searchKey: Key) -> [Value] {
-        let x: SLNode<Key, Value>? = search(searchKey)
+    func search(key: Key) -> [Value] {
+        let x: SLNode<Key, Value>? = search(key)
         if let array = x?.values {
             return array
         } else {
@@ -80,13 +80,13 @@ class SkipList<Key: protocol<Comparable>, Value: protocol<Equatable>> {
         }
     }
     
-    func insert(searchKey: Key, value newValue: Value) {
+    func insert(key: Key, value newValue: Value) {
         var update: [Int: SLNode<Key, Value>] = [:]
         var x = head
         
         // look for the key, and save the previous nodes all the way down in the update[] list
         for i in (1 ... self.level).reverse() {
-            while x.next[i-1] != nil && x.next[i-1]!.key < searchKey {
+            while x.next[i-1] != nil && x.next[i-1]!.key < key {
                 x = x.next[i-1]!
             }
             update[i] = x
@@ -98,7 +98,7 @@ class SkipList<Key: protocol<Comparable>, Value: protocol<Equatable>> {
             
             // If we're looking at the right key already, then there's nothing to insert. Just add
             // the new value to the values array.
-            if x.key == searchKey {
+            if x.key == key {
                 for i in 0 ..< x.values.count {
                     if newValue == x.values[i] {
                         return
@@ -122,20 +122,20 @@ class SkipList<Key: protocol<Comparable>, Value: protocol<Equatable>> {
         }
         
         // make a new node and patch it in to the saved nodes in the update[] list
-        let newNode = SLNode<Key, Value>(searchKey, value: newValue, maxLevel: maxLevel, level: level)
+        let newNode = SLNode<Key, Value>(key, value: newValue, maxLevel: maxLevel, level: level)
         for i in 1 ... level {
             newNode.next[i-1] = update[i]!.next[i-1]
             update[i]!.next[i-1] = newNode
         }
     }
     
-    func delete(searchKey: Key, searchValue: Value) -> Bool {
+    func delete(key: Key, value: Value) -> Bool {
         var update: [Int: SLNode<Key, Value>] = [:]
         var x = head
         
         // look for the key, and save the previous nodes all the way down in the update[] list
         for i in (1 ... level).reverse() {
-            while x.next[i-1] != nil && x.next[i-1]!.key < searchKey {
+            while x.next[i-1] != nil && x.next[i-1]!.key < key {
                 x = x.next[i-1]!
             }
             update[i] = x
@@ -150,14 +150,14 @@ class SkipList<Key: protocol<Comparable>, Value: protocol<Equatable>> {
         x = x.next[0]!
         
         // Look for a key match
-        if x.key != searchKey {
+        if x.key != key {
             return false
         }
         
         // look for match in values
         var foundIndex = -1
         for i in 0..<x.values.count {
-            if x.values[i] == searchValue {
+            if x.values[i] == value {
                 foundIndex = i
             }
         }
@@ -209,44 +209,4 @@ protocol SpeedTable {
 protocol SpeedTableRow {
 }
 
-class Table: SpeedTable {
-    let nameIndex: SkipList<String, TableRow>
-    let ageIndex: SkipList<Int, TableRow>
-    init(size: Int) {
-        nameIndex = SkipList<String, TableRow>(maxLevel: size)
-        ageIndex = SkipList<Int, TableRow>(maxLevel: size)
-    }
-    func create(name: String, age: Int, school: String? = nil) -> TableRow{
-        return TableRow(parent: self, name: name, age: age, school: school)
-    }
-    func destroy(row: TableRow) {
-        self.nameIndex.delete(row.name, searchValue: row)
-        self.ageIndex.delete(row.age, searchValue: row)
-    }
-}
-
-class TableRow: SpeedTableRow, Equatable {
-    let parent: Table
-    var name: String {
-        willSet { parent.nameIndex.delete(name, searchValue: self) }
-        didSet { parent.nameIndex.insert(name, value: self) }
-    }
-    var age: Int {
-        willSet { parent.ageIndex.delete(age, searchValue: self) }
-        didSet { parent.ageIndex.insert(age, value: self) }
-    }
-    var school: String? // Unindexed value
-    init(parent: Table, name: String, age: Int, school: String? = nil) {
-        self.parent=parent
-        self.name = name
-        self.age = age
-        parent.nameIndex.insert(self.name, value: self)
-        parent.ageIndex.insert(self.age, value: self)
-    }
-}
-
-// We need to provide this to allow the comparison in Skiplist.insert to work
-func ==(lhs: TableRow, rhs: TableRow) -> Bool {
-    return lhs === rhs
-}
 

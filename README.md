@@ -7,36 +7,41 @@ class Table: SpeedTable {
     let nameIndex: SkipList<String, TableRow>
     let ageIndex: SkipList<Int, TableRow>
     init(size: Int) {
-        nameIndex = SkipList<String, TableRow>(size)
-        ageIndex = SkipList<Int, TableRow>(size)
+        nameIndex = SkipList<String, TableRow>(maxLevel: size)
+        ageIndex = SkipList<Int, TableRow>(maxLevel: size)
     }
     func create(name: String, age: Int, school: String? = nil) -> TableRow{
         return TableRow(parent: self, name: name, age: age, school: school)
     }
     func destroy(row: TableRow) {
-        row.nameIndex.delete(row.name, row)
-        row.ageIndex.delete(row.age, row)
+        self.nameIndex.delete(row.name, searchValue: row)
+        self.ageIndex.delete(row.age, searchValue: row)
     }
 }
 
-class TableRow: SpeedTableRow {
+class TableRow: SpeedTableRow, Equatable {
     let parent: Table
     var name: String {
-        willSet { parent.nameIndex.delete(name, self) }
-        didSet { parent.nameIndex.insert(name, self) }
+        willSet { parent.nameIndex.delete(name, searchValue: self) }
+        didSet { parent.nameIndex.insert(name, value: self) }
     }
     var age: Int {
-        willSet { parent.ageIndex.delete(age, self) }
-        didSet { parent.ageIndex.insert(age, self) }
+        willSet { parent.ageIndex.delete(age, searchValue: self) }
+        didSet { parent.ageIndex.insert(age, value: self) }
     }
     var school: String? // Unindexed value
     init(parent: Table, name: String, age: Int, school: String? = nil) {
         self.parent=parent
         self.name = name
-        parent.nameIndex.insert(self.name, self)
         self.age = age
-        parent.ageIndex.insert(self.age, self)
+        parent.nameIndex.insert(self.name, value: self)
+        parent.ageIndex.insert(self.age, value: self)
     }
+}
+
+// We need to provide this to allow the comparison in Skiplist.insert to work
+func ==(lhs: TableRow, rhs: TableRow) -> Bool {
+    return lhs === rhs
 }
 ```
 

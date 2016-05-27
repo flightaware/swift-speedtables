@@ -1,6 +1,6 @@
 ## Overview
 
-This is a work in progress. The goal of this project is to create a multi-way indexed relation in Swift. The API is expected to be something like...
+This is a work in progress. The goal of this project is to create a multi-way indexed relation in Swift. Right now creating an indexed table is pretty manual:
 
 ```swift
 class Table: SpeedTable {
@@ -10,10 +10,10 @@ class Table: SpeedTable {
         nameIndex = SkipList<String, TableRow>(maxLevel: size)
         ageIndex = SkipList<Int, TableRow>(maxLevel: size)
     }
-    func create(name: String, age: Int, school: String? = nil) -> TableRow{
+    func insert(name: String, age: Int, school: String? = nil) -> TableRow{
         return TableRow(parent: self, name: name, age: age, school: school)
     }
-    func destroy(row: TableRow) {
+    func delete(row: TableRow) {
         self.nameIndex.delete(row.name, searchValue: row)
         self.ageIndex.delete(row.age, searchValue: row)
     }
@@ -45,7 +45,26 @@ func ==(lhs: TableRow, rhs: TableRow) -> Bool {
 }
 ```
 
-Then you would be able to do operations like:
+Eventually, we would like to have this created by a little applet that takes a Tcl
+speedtable definition and generates this framework.
+
+There are a few perations you can do on an index right now. The first two are implicit
+in the above definition.
+
+* ```table.insert(column, column, column...)```
+
+Insert a new row into the table, and all indexes, returns the row... or you can search for the row later.
+
+* ```table.delete(row)```
+
+Delete a row from the table, deletes it from all the indexes.
+
+* ```row.column = value```
+
+When you update a column in a row, it updates the index on the column automatically.
+
+The rest of the operations are implied by the behaviour of the indexes (skiplists), for
+example:
 
 ```swift
 for row in table.nameIndex.search(equal: myName) {
@@ -55,8 +74,32 @@ for row in table.nameIndex.search(equal: myName) {
 }
 ```
 
-Anticipated operations include search(equal: exactValue), search(min: min, max: max), search(in: [value, value, value])...
+The operations are:
 
-Searches are not initially going to be transactionalized, modifying the indexed value or inserting or deleting rows in a search is not supported.
+* ```skiplist.search(key)```
 
-Keys will be duplicated in the table. If the key is a mutable type, changing the key through a mutating function will not change the index... you will have to delete before the change and re-insert afterwards.
+Search looks up a key and returns an array of rows that match the key. This is just a simple skiplist lookup.
+
+* ```skiplist.insert(key, value)```
+* ```skiplist.delete(key, value)```
+
+You will not be using these directly in speedtables. The insert and delete a key-value pair from the index.
+
+* ```for (key, value) in skiplist```
+
+Walks the entire skiplist and returns all the key-value pairs. The value in a speedtable will be a speedtable row.
+
+For more complex searches, we are anticipating creating a query object:
+
+* ```let query = skiplist.query(lessThan: key)```
+* ```let query = skiplist.query(greaterThan: key)```
+* ```let query = skiplist.query(between: key, and: key)```
+* ```let query = skiplist.query(equalTo: key)```
+* ```let query = skiplist.query(in: [keys])```
+* ```let query = skiplist.query(matching: (key) -> Bool)```
+
+The query object will have the functions:
+
+* ```let (key, value) = query.first```
+* ```let (key, value) = query.next```
+* ```for (key, value) in query { ... }```

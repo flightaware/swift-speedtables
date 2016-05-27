@@ -18,7 +18,7 @@ func SLrandomLevel(maxLevel: Int) -> Int {
     return newLevel
 }
 
-class SLNode<Key: protocol<Comparable>, Value: protocol<Equatable>> {
+class SLNode<Key: Comparable, Value: Equatable> {
     let key: Key?
     var values: [Value]
     var level: Int
@@ -31,7 +31,7 @@ class SLNode<Key: protocol<Comparable>, Value: protocol<Equatable>> {
     }
 }
 
-class SkipList<Key: protocol<Comparable>, Value: protocol<Equatable>> {
+public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
     let head: SLNode<Key, Value>
     var maxLevel: Int
     var level: Int

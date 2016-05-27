@@ -99,18 +99,22 @@ for row in t.ageIndex.search(500) {
 }
 
 print("Walking nameIndex:")
-for (key, rows) in t.nameIndex.toArray() {
-    print("  Key: \(key)")
-    for row in rows {
-        print("    Name: \(row.name), age: \(row.age)")
+var lastName = ""
+for (key, row) in t.nameIndex {
+    if key != lastName {
+        print("  Key: \(key)")
+        lastName = key
     }
+    print("    Name: \(row.name), age: \(row.age)")
 }
 print("Walking ageIndex:")
-for (key, rows) in t.ageIndex.toArray() {
-    print("Key: \(key)")
-    for row in rows {
-        print("    Name: \(row.name), age: \(row.age)")
+var lastAge = -1
+for (key, row) in t.ageIndex {
+    if key != lastAge {
+        print("  Key: \(key)")
+        lastAge = key
     }
+    print("    Name: \(row.name), age: \(row.age)")
 }
 
 

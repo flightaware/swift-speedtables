@@ -192,6 +192,24 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
         return true
     }
     
+    public func generate() -> AnyGenerator<(Key, Value)> {
+        var row = head
+        var index = -1
+        
+        return AnyGenerator<(Key, Value)> {
+            if index < 0 || index >= row.values.count {
+                repeat {
+                    guard row.next[0] != nil else { return nil }
+                    row = row.next[0]!
+                } while row.values.count == 0
+                index = 0
+            }
+            let next = row.values[index]
+            index += 1
+            return (row.key!, next)
+        }
+    }
+    
     func toArray() -> [(Key, [Value])] {
         var a: [(Key, [Value])] = []
         var x = head

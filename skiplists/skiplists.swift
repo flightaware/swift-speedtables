@@ -18,7 +18,7 @@ func SLrandomLevel(maxLevel: Int) -> Int {
     return newLevel
 }
 
-class SLNode<Key: protocol<Comparable>, Value: protocol<Comparable>> {
+class SLNode<Key: protocol<Comparable>, Value: protocol<Equatable>> {
     let key: Key?
     var values: [Value]
     var level: Int
@@ -31,7 +31,7 @@ class SLNode<Key: protocol<Comparable>, Value: protocol<Comparable>> {
     }
 }
 
-class SkipList<Key: protocol<Comparable>, Value: protocol<Comparable>> {
+class SkipList<Key: protocol<Comparable>, Value: protocol<Equatable>> {
     let head: SLNode<Key, Value>
     var maxLevel: Int
     var level: Int
@@ -173,7 +173,7 @@ class SkipList<Key: protocol<Comparable>, Value: protocol<Comparable>> {
             return true
         }
 
-        // Now we've found a value, deleted it, and emptied the values list, we can selete this whole entry
+        // Now we've found a value, deleted it, and emptied the values list, we can delete this whole node
 
         // point all the previous node to the new next node
         for i in 1 ... self.level {

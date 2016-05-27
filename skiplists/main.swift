@@ -49,10 +49,15 @@ print(l.toArray())
 let t = Table(size: 100)
 
 print("Adding cartoon characters")
-t.insert("Nick", age: 32)
-t.insert("Judy", age: 22)
-t.insert("chip", age: 5)
+t.insert("Nick", age: 32) // "200 dollars a day since I was twelve"
+t.insert("Judy", age: 22) // Guess
+t.insert("chip", age: 5) // How old can a chipmunk be?
 t.insert("dale", age: 5)
+
+// This is actually ugly: ".NSYearYalendarUnit" is deprecated, but the replacement ".NSCalendarUnitYear" is not found
+let year = NSCalendar.currentCalendar().components(.NSYearCalendarUnit, fromDate: NSDate()).year
+t.insert("mickey", age: year - 1928) // Steamboat Willie
+t.insert("bugs", age: year - 1940) // A Wild Hare
 
 print("Looking for 5 year olds")
 for row in t.ageIndex.search(5) {
@@ -79,8 +84,13 @@ t.insert("grumpy", age: 500)
 print("Adding vampires. They're really old too, and some have multiple ages")
 t.insert("lestat", age: 500)
 t.insert("dracula", age: 500)
-t.insert("dracula", age: 80)
-t.insert("dracula", age: 120)
+t.insert("dracula", age: year - 1897) // Book
+t.insert("dracula", age: year - 1931) // Bella Lugosi
+t.insert("dracula", age: year - 1958) // Christopher Lee
+t.insert("dracula", age: year - 1966) //  ""
+t.insert("dracula", age: year - 1970) //  ""
+t.insert("dracula", age: year - 1979) // Frank langella
+t.insert("dracula", age: year - 1992) // Gary Oldman
 
 print("Wait on, we can't have 500 year old schoolkids!")
 for row in t.ageIndex.search(500) {

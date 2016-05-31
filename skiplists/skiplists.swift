@@ -36,18 +36,18 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
     var maxLevel: Int
     var level: Int
     
-    init(maxLevel: Int) {
+    public init(maxLevel: Int) {
         self.maxLevel = maxLevel
         self.level = 1
         self.head = SLNode<Key, Value>(nil, maxLevel: maxLevel, level: maxLevel)
     }
     
-    convenience init(maxNodes: Int) {
+    public convenience init(maxNodes: Int) {
         let logMaxNodes = Int(round(log(Double(maxNodes)) / log(1 / randomProbability)))
         self.init(maxLevel: logMaxNodes)
     }
-
-    func search(key: Key) -> SLNode<Key, Value>? {
+    
+    func search(greaterThanOrEqualTo key: Key) -> SLNode<Key, Value>? {
         var x = head
         
         // look for the key
@@ -61,18 +61,16 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
         guard x.next[0] != nil else {
             return nil
         }
-
+        
         // no, are we looking at a valid node?
         x = x.next[0]!
-        if x.key == key {
-            return x
-        } else {
-            return nil
-        }
+        
+        return x
     }
     
-    func search(key: Key) -> [Value] {
-        let x: SLNode<Key, Value>? = search(key)
+    
+    public func search(greaterThanOrEqualTo key: Key) -> [Value] {
+        let x: SLNode<Key, Value>? = search(greaterThanOrEqualTo: key)
         if let array = x?.values {
             return array
         } else {
@@ -80,7 +78,27 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
         }
     }
     
-    func insert(key: Key, value newValue: Value) {
+    func search(equalTo key: Key) -> SLNode<Key, Value>? {
+        let x: SLNode<Key, Value>? = search(greaterThanOrEqualTo: key)
+
+        // Check for an exact match
+        if x != nil && x!.key == key {
+            return x
+        } else {
+            return nil
+        }
+    }
+    
+    public func search(equalTo key: Key) -> [Value] {
+        let x: SLNode<Key, Value>? = search(equalTo: key)
+        if let array = x?.values {
+            return array
+        } else {
+            return []
+        }
+    }
+    
+    public func insert(key: Key, value newValue: Value) {
         var update: [Int: SLNode<Key, Value>] = [:]
         var x = head
         
@@ -129,7 +147,7 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
         }
     }
     
-    func delete(key: Key, value: Value) -> Bool {
+    public func delete(key: Key, value: Value) -> Bool {
         var update: [Int: SLNode<Key, Value>] = [:]
         var x = head
         

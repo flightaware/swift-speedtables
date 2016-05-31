@@ -33,6 +33,17 @@ class SLNode<Key: Comparable, Value: Equatable> {
     func nextNode() -> SLNode<Key, Value>? {
         return next[0]
     }
+    
+    func dump(tag: String, verbose: Bool = false) {
+        print("\(tag) = Node(\(key) with \(values.count) values")
+        if(verbose) {
+            var i = 0
+            while i <= values.count {
+                print("    \(values[i])")
+                i += 1
+            }
+        }
+    }
 }
 
 public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
@@ -242,10 +253,8 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
         return a
     }
     
-    func query(lessThan: Key) -> Query<Key, Value> {
-        let query = Query<Key, Value>(list: self, min: nil, max: lessThan, minEqual: false, maxEqual: false)
-        // stuff
-        return query
+    func query(min min: Key? = nil, max: Key? = nil, minEqual: Bool = false, maxEqual: Bool = false) -> Query<Key, Value> {
+        return Query<Key, Value>(list: self, min: min, max: max, minEqual: minEqual, maxEqual: maxEqual)
     }
 }
 

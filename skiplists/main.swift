@@ -25,7 +25,7 @@ print(l.toArray())
 l.insert("hello", value: "Hello my baby")
 l.insert("hello", value: "Hello my honey")
 l.insert("hello", value: "Hello my ragtime gal")
-let hellos: [String] = l.search("hello")
+let hellos: [String] = l.search(equalTo: "hello")
 for hello in hellos {
     print("hello is '\(hello)'")
 }
@@ -34,7 +34,7 @@ l.insert("goodbye", value: "Goodnight America, and all the ships at sea")
 print(l.toArray())
 
 func delete_all(l: SkipList<String, String>, key: String) {
-    for val in l.search(key) {
+    for val in l.search(equalTo: key) {
         print("Deleting \((key, val))")
         l.delete(key, value: val)
     }
@@ -60,12 +60,12 @@ t.insert("mickey", age: year - 1928) // Steamboat Willie
 t.insert("bugs", age: year - 1940) // A Wild Hare
 
 print("Looking for 5 year olds")
-for row in t.ageIndex.search(5) {
+for row in t.ageIndex.search(equalTo: 5) {
     print("Name: \(row.name), age: \(row.age)")
 }
 
 print("Change chip's age to 6,, and make sure there is only one chip")
-let chips: [TableRow] = t.nameIndex.search("chip")
+let chips: [TableRow] = t.nameIndex.search(equalTo: "chip")
 if(chips.count == 1) {
     chips[0].age = 6
 } else {
@@ -93,7 +93,7 @@ t.insert("dracula", age: year - 1979) // Frank langella
 t.insert("dracula", age: year - 1992) // Gary Oldman
 
 print("Wait on, we can't have 500 year old schoolkids!")
-for row in t.ageIndex.search(500) {
+for row in t.ageIndex.search(equalTo: 500) {
     print("Deleting impossible entry \(row.name), \(row.age)")
     t.delete(row)
 }

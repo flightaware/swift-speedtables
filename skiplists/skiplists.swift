@@ -29,6 +29,10 @@ class SLNode<Key: Comparable, Value: Equatable> {
         self.level = (level > 0) ? level : SLrandomLevel(maxLevel)
         self.next = Array<SLNode<Key, Value>?>(count: maxLevel, repeatedValue: nil)
     }
+    
+    func nextNode() -> SLNode<Key, Value>? {
+        return next[0]
+    }
 }
 
 public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
@@ -236,6 +240,12 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
             a += [(x.key!, x.values)]
         }
         return a
+    }
+    
+    func query(lessThan: Key) -> Query<Key, Value> {
+        let query = Query<Key, Value>(list: self, min: nil, max: lessThan, minEqual: false, maxEqual: false)
+        // stuff
+        return query
     }
 }
 

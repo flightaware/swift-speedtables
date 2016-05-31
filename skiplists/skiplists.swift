@@ -83,7 +83,6 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
         return x
     }
     
-    
     public func search(greaterThanOrEqualTo key: Key) -> [Value] {
         let x: SLNode<Key, Value>? = search(greaterThanOrEqualTo: key)
         if let array = x?.values {

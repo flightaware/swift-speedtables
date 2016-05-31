@@ -8,58 +8,23 @@
 
 import Foundation
 
-private class QueryState<Key: Comparable, Value: Equatable> {
-    var currentNode: SLNode<Key, Value>?
-    var currentIndex: Int
-    let max: Key?
-    let maxEqual: Bool
+private struct QueryState<Key: Comparable, Value: Equatable> {
+    var node: SLNode<Key, Value>? = nil
+    var index: Int = -1
     
-    private init(node: SLNode<Key, Value>?, max: Key?, maxEqual: Bool) {
-        currentNode = node
-        currentIndex = -1
-        self.max = max
-        self.maxEqual = maxEqual
-    }
-    
-    private func step() {
-        guard currentNode != nil else { return }
-        
-        // step to the next index
-        currentIndex += 1
-        
-        // if we've stepped past the current node's values, keep stepping until we get a node with values
-        while currentNode != nil && currentIndex >= currentNode!.values.count {
-            currentNode = currentNode!.nextNode()
-            currentIndex = 0
-        }
-        
-        // if you ran out of nodes, our work is done
-        if currentNode == nil { return }
-        
-        // If there's no max, our work is done
-        if max == nil { return }
-        
-        if maxEqual {
-            if max < currentNode!.key {
-                currentNode = nil
-            }
-        } else {
-            if max <= currentNode!.key {
-                currentNode = nil
-            }
-        }
+    private init(node: SLNode<Key, Value>?) {
+        self.node = node
+        self.index = -1
     }
 }
 
-// Query 0.1
-// Initialized with min key (may be nil), max key (may be nil)
 public class Query<Key: Comparable, Value: Equatable>: SequenceType {
     let list: SkipList<Key, Value>
     let min: Key?
     let max: Key?
     let minEqual: Bool
     let maxEqual: Bool
-    private var state: QueryState<Key, Value>?
+    private var state: QueryState<Key, Value>
     
     init(list: SkipList<Key, Value>, min: Key? = nil, max: Key? = nil, minEqual: Bool = true, maxEqual: Bool = true) {
         self.list = list
@@ -67,12 +32,12 @@ public class Query<Key: Comparable, Value: Equatable>: SequenceType {
         self.minEqual = minEqual
         self.max = max
         self.maxEqual = maxEqual
-        self.state = nil
+        self.state = QueryState<Key, Value>(node: nil)
     }
     
-    private func firstNode() -> SLNode<Key, Value>? {
+    private func start() -> QueryState<Key, Value> {
         var node: SLNode<Key, Value>?
-        
+
         if min == nil {
             node = list.head.nextNode()
         } else {
@@ -81,36 +46,60 @@ public class Query<Key: Comparable, Value: Equatable>: SequenceType {
                 node = node!.nextNode()
             }
         }
+        return QueryState<Key, Value>(node: node)
+    }
+    
+    private func step(inout state: QueryState<Key, Value>) {
+        guard state.node != nil else { return }
         
-        return node
+        // step to the next index
+        state.index += 1
+        
+        // if we've stepped past the current node's values, keep stepping until we get a node with values
+        while state.node != nil && state.index >= state.node!.values.count {
+            state.node = state.node!.nextNode()
+            state.index = 0
+        }
+        
+        // if you ran out of nodes, our work is done
+        if state.node == nil { return }
+        
+        // If there's no max, our work is done
+        if max == nil { return }
+        
+        if maxEqual {
+            if max < state.node!.key {
+                state.node = nil
+            }
+        } else {
+            if max <= state.node!.key {
+                state.node = nil
+            }
+        }
     }
     
     public func first() -> (Key, Value)? {
-        state = QueryState(node: firstNode(), max: max, maxEqual: maxEqual)
+        state = start()
         return next()
     }
     
-    
     public func next() -> (Key, Value)? {
-        guard state != nil else { return nil }
+        step(&state)
         
-        state!.step()
-
-        guard state!.currentNode != nil else { return nil }
+        guard state.node != nil else { return nil }
         
-        return (state!.currentNode!.key!, state!.currentNode!.values[state!.currentIndex])
+        return (state.node!.key!, state.node!.values[state.index])
     }
     
     public func generate() -> AnyGenerator<(Key, Value)> {
-        let state = QueryState(node: firstNode(), max: max, maxEqual: maxEqual)
-
+        var state = start()
+        
         return AnyGenerator<(Key, Value)> {
-            state.step()
+            self.step(&state)
             
-            guard state.currentNode != nil else { return nil }
+            guard state.node != nil else { return nil }
             
-            return (state.currentNode!.key!, state.currentNode!.values[state.currentIndex])
-
+            return (state.node!.key!, state.node!.values[state.index])
         }
     }
 }

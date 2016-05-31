@@ -252,6 +252,30 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
         return a
     }
     
+    func query(from start: Key?, through end: Key?) -> Query<Key, Value> {
+        return Query<Key, Value>(list: self, min: start, max: end, minEqual: true, maxEqual: true)
+    }
+    
+    func query(from start: Key?, to end: Key?) -> Query<Key, Value> {
+        return Query<Key, Value>(list: self, min: start, max: end, minEqual: true, maxEqual: false)
+    }
+
+    func query(greaterThanOrEqual key: Key?) -> Query<Key, Value> {
+        return Query<Key, Value>(list: self, min: key, minEqual: true)
+    }
+    
+    func query(greaterThan key: Key?) -> Query<Key, Value> {
+        return Query<Key, Value>(list: self, min: key, minEqual: false)
+    }
+
+    func query(lessThanOrEqual key: Key?) -> Query<Key, Value> {
+        return Query<Key, Value>(list: self, max: key, maxEqual: true)
+    }
+    
+    func query(lessThan key: Key?) -> Query<Key, Value> {
+        return Query<Key, Value>(list: self, max: key, maxEqual: false)
+    }
+    
     func query(min min: Key? = nil, max: Key? = nil, minEqual: Bool = false, maxEqual: Bool = false) -> Query<Key, Value> {
         return Query<Key, Value>(list: self, min: min, max: max, minEqual: minEqual, maxEqual: maxEqual)
     }

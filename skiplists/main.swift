@@ -118,11 +118,15 @@ for (key, row) in t.ageIndex {
 }
 
 print("Queries...")
-print("  Query: 8 <= age < 50")
-for (key, row) in t.ageIndex.query(min: 8, max: 50, minEqual: true, maxEqual: false) {
+print("  Query: age from: 8 to: 50 // not including 50")
+for (key, row) in t.ageIndex.query(from: 8, to: 50) {
     print("    Name: \(row.name), age: \(row.age)")
 }
-print("  Query: \"A\" <= name <= \"Z~\")")
-for (key, row) in t.nameIndex.query(min: "A", max: "Z~", minEqual: true, maxEqual: true) {
+print("  Query: age from: 8 through: 50 // including 50")
+for (key, row) in t.ageIndex.query(from: 8, through: 50) {
+    print("    Name: \(row.name), age: \(row.age)")
+}
+print("  Query: name from: \"A\" through: \"Z~\")")
+for (key, row) in t.nameIndex.query(from: "A", through: "Z~") {
     print("    Name: \(row.name), age: \(row.age)")
 }

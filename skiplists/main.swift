@@ -54,8 +54,8 @@ t.insert("Judy", age: 22) // Guess
 t.insert("chip", age: 5) // How old can a chipmunk be?
 t.insert("dale", age: 5)
 
-// This is actually ugly: ".NSYearYalendarUnit" is deprecated, but the replacement ".NSCalendarUnitYear" is not found
-let year = NSCalendar.currentCalendar().components(.NSYearCalendarUnit, fromDate: NSDate()).year
+// Just use a fixed year for repeatability.
+let year = 2016
 t.insert("mickey", age: year - 1928) // Steamboat Willie
 t.insert("bugs", age: year - 1940) // A Wild Hare
 

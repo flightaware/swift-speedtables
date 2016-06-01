@@ -8,10 +8,11 @@
 
 import Foundation
 
-print("Hello, World!")
+print("Basic skiplist test")
 
 let l = SkipList<String, String>(maxLevel: 6)
 
+print("\nPopulating list.")
 l.insert("hello", value: "I say hello")
 l.insert("goodbye", value: "You say goodbye")
 l.insert("yes", value: "I say yes")
@@ -20,18 +21,14 @@ l.insert("high", value: "I say high")
 l.insert("low", value: "you say low")
 l.insert("stop", value: "You say stop")
 l.insert("go", value: "I say go go go")
-print(l.toArray())
-
 l.insert("hello", value: "Hello my baby")
 l.insert("hello", value: "Hello my honey")
 l.insert("hello", value: "Hello my ragtime gal")
-let hellos: [String] = l.search(equalTo: "hello")
-for hello in hellos {
-    print("hello is '\(hello)'")
-}
-
 l.insert("goodbye", value: "Goodnight America, and all the ships at sea")
-print(l.toArray())
+print("Dumping list:")
+for (key, value) in l {
+    print("    \(key): \(value)")
+}
 
 func delete_all(l: SkipList<String, String>, key: String) {
     for val in l.search(equalTo: key) {
@@ -40,11 +37,17 @@ func delete_all(l: SkipList<String, String>, key: String) {
     }
 }
 
+print("Delete test")
 delete_all(l, key: "high")
 delete_all(l, key: "low")
 delete_all(l, key: "goodbye")
 
-print(l.toArray())
+print("Dumping list:")
+for (key, value) in l {
+    print("\(key): \(value)")
+}
+
+print("\n\nSpeedtables test")
 
 let t = Table(size: 100)
 
@@ -137,6 +140,7 @@ for (key, row) in t.nameIndex {
     try row.setStudentID("CC\(nextID)")
     nextID += 1
 }
+print("Initial student IDs")
 for (key, row) in t.studentIDIndex {
     print("Name: \(row.name) ID: \(key)")
 }
@@ -156,6 +160,22 @@ for row in t.nameIndex.search(equalTo: "dracula") {
         print(error)
     }
 }
+print("Deleting rats and mice (fully indexed)")
+for row in t.nameIndex.search(equalTo: "monty") { t.delete(row) }
+for row in t.nameIndex.search(equalTo: "gadget") { t.delete(row) }
+for row in t.nameIndex.search(equalTo: "mickey") { t.delete(row) }
+print("Deleting young draculas (no Student ID index)")
+var rows: [TableRow] = t.nameIndex.search(equalTo: "dracula")
+for row in rows {
+    if row.age < 50 {
+        t.delete(row)
+    }
+}
+print("Final entries")
+for (key, row) in t.nameIndex {
+    print("Name: \(key), Age: \(row.age), ID: \(row.getStudentID())")
+}
+print("Final student IDs")
 for (key, row) in t.studentIDIndex {
     print("Name: \(row.name) ID: \(key)")
 }

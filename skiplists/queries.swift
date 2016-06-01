@@ -78,6 +78,10 @@ public class Query<Key: Comparable, Value: Equatable>: SequenceType {
         }
     }
     
+    public func reset() {
+        state = start()
+    }
+    
     public func first() -> (Key, Value)? {
         state = start()
         return next()

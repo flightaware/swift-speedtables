@@ -59,7 +59,7 @@ class TableRow: SpeedTableRow, Equatable {
         self.parent = parent
         self.name = name
         self.age = age
-        // This needs to be done  explicitly because the willSet/didSet doesn't
+        // This needs to be done explicitly because the willSet/didSet doesn't
         // fire on initialization.
         parent.nameIndex.insert(self.name, value: self)
         parent.ageIndex.insert(self.age, value: self)

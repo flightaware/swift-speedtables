@@ -35,9 +35,6 @@ class Table: SpeedTable {
 
 // Each speedtable requires two classes, one for the table as a whole, one for
 // the row holding the data
-//
-// Note the try! in the inserts. Insert can throw but only if the index is defined
-// as unique.
 class TableRow: SpeedTableRow, Equatable {
     var parent: Table?
     var name: String {

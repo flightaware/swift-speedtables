@@ -283,16 +283,6 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
         }
     }
     
-    func toArray() -> [(Key, [Value])] {
-        var a: [(Key, [Value])] = []
-        var x = head
-        while x.next[0] != nil {
-            x = x.next[0]!
-            a += [(x.key!, x.values)]
-        }
-        return a
-    }
-    
     func query(from start: Key?, through end: Key?) -> Query<Key, Value> {
         return Query<Key, Value>(list: self, min: start, max: end, minEqual: true, maxEqual: true)
     }

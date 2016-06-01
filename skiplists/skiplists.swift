@@ -46,20 +46,27 @@ class SLNode<Key: Comparable, Value: Equatable> {
     }
 }
 
+// Can't use a generic typealias here until Swift 3
+//typealias ErrorHandler<Key: Comparable> = (SkipListError<Key>) -> Void
+
 public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
     let head: SLNode<Key, Value>
+    let unique: Bool
+    let errorHandler: ((SkipListError<Key>) -> Void)?
     var maxLevel: Int
     var level: Int
     
-    public init(maxLevel: Int) {
+    public init(maxLevel: Int, unique: Bool = false, errorHandler: ((SkipListError<Key>) -> Void)? = nil) {
         self.maxLevel = maxLevel
         self.level = 1
+        self.unique = unique
+        self.errorHandler = errorHandler
         self.head = SLNode<Key, Value>(nil, maxLevel: maxLevel, level: maxLevel)
     }
     
-    public convenience init(maxNodes: Int) {
+    public convenience init(maxNodes: Int, unique: Bool = false, errorHandler: ((SkipListError<Key>) -> Void)? = nil) {
         let logMaxNodes = Int(round(log(Double(maxNodes)) / log(1 / randomProbability)))
-        self.init(maxLevel: logMaxNodes)
+        self.init(maxLevel: logMaxNodes, unique: unique, errorHandler: errorHandler)
     }
     
     func search(greaterThanOrEqualTo key: Key) -> SLNode<Key, Value>? {
@@ -131,6 +138,9 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
             // If we're looking at the right key already, then there's nothing to insert. Just add
             // the new value to the values array.
             if x.key == key {
+                if unique && errorHandler != nil {
+                    errorHandler!(SkipListError<Key>.KeyNotUnique(key: key))
+                }
                 for i in 0 ..< x.values.count {
                     if newValue == x.values[i] {
                         return
@@ -281,3 +291,7 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
     }
 }
 
+// Skiplist errors
+public enum SkipListError<Key>: ErrorType {
+    case KeyNotUnique(key: Key)
+}

@@ -14,31 +14,30 @@ import Foundation
 //     String name indexed
 //     Int age indexed
 //     String school optional
-//     String studentID unique primary
+//     String studentID unique primary // not implemented
 // )
 class Table: SpeedTable {
     let nameIndex: SkipList<String, TableRow>
     let ageIndex: SkipList<Int, TableRow>
     init(size: Int) {
-        nameIndex = SkipList<String, TableRow>(maxLevel: size)
-        ageIndex = SkipList<Int, TableRow>(maxLevel: size)
+        nameIndex = SkipList<String, TableRow>(maxLevel: size, unique: false)
+        ageIndex = SkipList<Int, TableRow>(maxLevel: size, unique: false)
     }
     func insert(name: String, age: Int, school: String? = nil) -> TableRow {
         // Creating the table row does all the insertion stuff
         return TableRow(parent: self, name: name, age: age, school: school)
     }
     func delete(row: TableRow) {
-        // Have to manually unthread the row from all lists -- possibly
-        // this should be moved into the row definition?
-        self.nameIndex.delete(row.name, value: row)
-        self.ageIndex.delete(row.age, value: row)
-        // break the link to myself 
-        row.parent = nil
+        // delegate to row
+        row.delete()
     }
 }
 
 // Each speedtable requires two classes, one for the table as a whole, one for
 // the row holding the data
+//
+// Note the try! in the inserts. Insert can throw but only if the index is defined
+// as unique.
 class TableRow: SpeedTableRow, Equatable {
     var parent: Table?
     var name: String {
@@ -50,6 +49,7 @@ class TableRow: SpeedTableRow, Equatable {
         didSet { parent!.ageIndex.insert(age, value: self) }
     }
     var school: String? // Unindexed value
+    var studentID: String?
     init(parent: Table, name: String, age: Int, school: String? = nil) {
         self.parent = parent
         self.name = name
@@ -63,7 +63,7 @@ class TableRow: SpeedTableRow, Equatable {
     func delete() {
         parent!.nameIndex.delete(name, value: self)
         parent!.ageIndex.delete(age, value:self)
-        parent = nil
+        parent = nil // do not modify a row after it's deleted!
     }
 }
 

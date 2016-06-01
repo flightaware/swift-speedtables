@@ -110,12 +110,43 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
         }
     }
     
+    public func exists(key: Key) -> Bool {
+        let x: SLNode<Key, Value>? = search(equalTo: key)
+        return x != nil
+    }
+    
     public func search(equalTo key: Key) -> [Value] {
         let x: SLNode<Key, Value>? = search(equalTo: key)
         if let array = x?.values {
             return array
         } else {
             return []
+        }
+    }
+    
+    // Replace an entry in a skiplist
+    public func replace(newKey: Key?, inout keyStore: Key?, value: Value) throws {
+        // no change - no work
+        if newKey == keyStore {
+            return
+        }
+        
+        // If it's supposed to be unique, throw an error if it's not
+        if unique {
+            if let k = newKey {
+                if exists(k) {
+                    throw SkipListError.KeyNotUnique(key: k)
+                }
+            }
+        }
+        
+        // showtime -- remove the old entry, update the keystore, insert the new value
+        if let k = keyStore {
+            delete(k, value: value)
+        }
+        keyStore = newKey
+        if let k = newKey {
+            insert(k, value: value)
         }
     }
     

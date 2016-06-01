@@ -130,3 +130,32 @@ print("  Query: name from: \"A\" through: \"Z~\")")
 for (key, row) in t.nameIndex.query(from: "A", through: "Z~") {
     print("    Name: \(row.name), age: \(row.age)")
 }
+
+print("Unique and optional columns")
+var nextID = 627846
+for (key, row) in t.nameIndex {
+    try row.setStudentID("CC\(nextID)")
+    nextID += 1
+}
+for (key, row) in t.studentIDIndex {
+    print("Name: \(row.name) ID: \(key)")
+}
+print("Setting dracula to XXXXXXXX - should have several failures")
+for row in t.nameIndex.search(equalTo: "dracula") {
+    do {
+        try row.setStudentID("XXXXXXXX")
+    } catch {
+        print(error)
+    }
+}
+print("Setting dracula to nil - should always succeed")
+for row in t.nameIndex.search(equalTo: "dracula") {
+    do {
+        try row.setStudentID(nil)
+    } catch {
+        print(error)
+    }
+}
+for (key, row) in t.studentIDIndex {
+    print("Name: \(row.name) ID: \(key)")
+}

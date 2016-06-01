@@ -67,6 +67,9 @@ class TableRow: SpeedTableRow, Equatable {
     func delete() {
         parent!.nameIndex.delete(name, value: self)
         parent!.ageIndex.delete(age, value:self)
+        if let ID = studentIDStorage {
+            parent!.studentIDIndex.delete(ID, value:self)
+        }
         parent = nil // do not modify a row after it's deleted!
     }
 }

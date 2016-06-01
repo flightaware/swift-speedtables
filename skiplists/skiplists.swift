@@ -281,10 +281,3 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
     }
 }
 
-protocol SpeedTable {
-}
-
-protocol SpeedTableRow {
-}
-
-

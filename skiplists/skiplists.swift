@@ -157,7 +157,7 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
         // If the new node is higher than the current level, fill up the update[] list
         // with head
         if level > self.level {
-            for i in self.level ... level {
+            for i in self.level+1 ... level {
                 update[i] = self.head
             }
             self.level = level

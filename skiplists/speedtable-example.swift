@@ -14,7 +14,7 @@ import Foundation
 //     String name indexed
 //     Int age indexed
 //     String school optional
-//     String studentID unique primary // not implemented
+//     String studentID unique optional indexed
 // )
 class Table: SpeedTable {
     let nameIndex: SkipList<String, TableRow>

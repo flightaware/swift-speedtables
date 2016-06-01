@@ -9,14 +9,16 @@ This is a work in progress. The goal of this project is to create a multi-way in
 //     String name indexed
 //     Int age indexed
 //     String school optional
-//     String studentID unique primary // not implemented
+//     String studentID unique optional indexed
 // )
 class Table: SpeedTable {
     let nameIndex: SkipList<String, TableRow>
     let ageIndex: SkipList<Int, TableRow>
+    let studentIDIndex: SkipList<String, TableRow>
     init(size: Int) {
         nameIndex = SkipList<String, TableRow>(maxLevel: size, unique: false)
         ageIndex = SkipList<Int, TableRow>(maxLevel: size, unique: false)
+        studentIDIndex = SkipList<String, TableRow>(maxLevel: size, unique: true)
     }
     func insert(name: String, age: Int, school: String? = nil) -> TableRow {
         // Creating the table row does all the insertion stuff
@@ -41,7 +43,13 @@ class TableRow: SpeedTableRow, Equatable {
         didSet { parent!.ageIndex.insert(age, value: self) }
     }
     var school: String? // Unindexed value
-    var studentID: String?
+    var studentIDStorage: String? // unique optional value
+    func getStudentID() -> String? {
+        return studentIDStorage
+    }
+    func setStudentID(ID: String?) throws {
+        try parent!.studentIDIndex.replace(ID, keyStore: &studentIDStorage, value: self)
+    }
     init(parent: Table, name: String, age: Int, school: String? = nil) {
         self.parent = parent
         self.name = name

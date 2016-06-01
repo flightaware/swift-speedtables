@@ -54,7 +54,6 @@ class TableRow: SpeedTableRow, Equatable {
         parent.nameIndex.insert(self.name, value: self)
         parent.ageIndex.insert(self.age, value: self)
     }
-    // possibly do this here? Then Table.delete(row) just becomes row.delete()?
     func delete() {
         parent!.nameIndex.delete(name, value: self)
         parent!.ageIndex.delete(age, value:self)

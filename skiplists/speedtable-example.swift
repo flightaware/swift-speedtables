@@ -8,7 +8,7 @@
 
 import Foundation
 
-// Manually generated speedtable definition. This can be automatically generated
+// Manually generated speedtable definition. This could be automatically generated
 // from something SQL-ish like:
 // TABLE Table (
 //     String name indexed

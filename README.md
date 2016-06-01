@@ -3,7 +3,7 @@
 This is a work in progress. The goal of this project is to create a multi-way indexed relation in Swift. Right now creating an indexed table is pretty manual:
 
 ```swift
-// Manually generated speedtable definition. This can be automatically generated
+// Manually generated speedtable definition. This could be automatically generated
 // from something SQL-ish like:
 // TABLE Table (
 //     String name indexed

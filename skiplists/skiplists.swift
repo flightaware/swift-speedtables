@@ -163,14 +163,17 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
         }
         
         // If we haven't run off the end...
-        if x.nextNode() != nil {
-            x = x.nextNode()!
+        if x.next[0] != nil {
+            x = x.next[0]!
             
             // If we're looking at the right key already, then there's nothing to insert. Just add
             // the new value to the values array.
             if x.key == key {
-                if unique && errorHandler != nil {
-                    errorHandler!(SkipListError<Key>.KeyNotUnique(key: key))
+                if unique {
+                    if errorHandler != nil {
+                        errorHandler!(SkipListError<Key>.KeyNotUnique(key: key))
+                    }
+                    return
                 }
                 for i in 0 ..< x.values.count {
                     if newValue == x.values[i] {

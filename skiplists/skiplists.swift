@@ -80,12 +80,12 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
         }
         
         // have we run off the end?
-        guard x.next[0] != nil else {
+        guard x.nextNode() != nil else {
             return nil
         }
         
         // no, are we looking at a valid node?
-        x = x.next[0]!
+        x = x.nextNode()!
         
         return x
     }
@@ -163,8 +163,8 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
         }
         
         // If we haven't run off the end...
-        if x.next[0] != nil {
-            x = x.next[0]!
+        if x.nextNode() != nil {
+            x = x.nextNode()!
             
             // If we're looking at the right key already, then there's nothing to insert. Just add
             // the new value to the values array.
@@ -215,12 +215,12 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
         }
         
         // check if run off end of list, nothing to do
-        guard x.next[0] != nil else {
+        guard x.nextNode() != nil else {
             return false
         }
         
         // Point to the node we're maybe going to delete, if it matches
-        x = x.next[0]!
+        x = x.nextNode()!
         
         // Look for a key match
         if x.key != key {
@@ -272,8 +272,8 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
         return AnyGenerator<(Key, Value)> {
             if index < 0 || index >= row.values.count {
                 repeat {
-                    guard row.next[0] != nil else { return nil }
-                    row = row.next[0]!
+                    guard row.nextNode() != nil else { return nil }
+                    row = row.nextNode()!
                 } while row.values.count == 0
                 index = 0
             }

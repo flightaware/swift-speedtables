@@ -163,8 +163,8 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
         }
         
         // If we haven't run off the end...
-        if x.next[0] != nil {
-            x = x.next[0]!
+        if x.nextNode() != nil {
+            x = x.nextNode()!
             
             // If we're looking at the right key already, then there's nothing to insert. Just add
             // the new value to the values array.

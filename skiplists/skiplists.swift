@@ -80,12 +80,12 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
         }
         
         // have we run off the end?
-        guard x.nextNode() != nil else {
+        guard x.next[0] != nil else {
             return nil
         }
         
         // no, are we looking at a valid node?
-        x = x.nextNode()!
+        x = x.next[0]!
         
         return x
     }
@@ -154,18 +154,21 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
         //var update: [Int: SLNode<Key, Value>] = [:]
         var update = Array<SLNode<Key, Value>?>(count: maxLevel, repeatedValue: nil)
         var x = head
+        var i: Int
         
         // look for the key, and save the previous nodes all the way down in the update[] list
-        for i in (1 ... self.level).reverse() {
+        i = self.level
+        while i >= 1 {
             while x.next[i-1] != nil && x.next[i-1]!.key < key {
                 x = x.next[i-1]!
             }
             update[i-1] = x
+            i -= 1
         }
         
         // If we haven't run off the end...
-        if x.nextNode() != nil {
-            x = x.nextNode()!
+        if x.next[0] != nil {
+            x = x.next[0]!
             
             // If we're looking at the right key already, then there's nothing to insert. Just add
             // the new value to the values array.
@@ -191,18 +194,18 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
         
         // If the new node is higher than the current level, fill up the update[] list
         // with head
-        if level > self.level {
-            for i in self.level+1 ... level {
-                update[i-1] = self.head
-            }
-            self.level = level
+        while level > self.level {
+            self.level += 1
+            update[self.level-1] = self.head
         }
         
         // make a new node and patch it in to the saved nodes in the update[] list
         let newNode = SLNode<Key, Value>(key, value: newValue, maxLevel: maxLevel, level: level)
-        for i in 1 ... level {
+        i = 1
+        while i <= level {
             newNode.next[i-1] = update[i-1]!.next[i-1]
             update[i-1]!.next[i-1] = newNode
+            i += 1
         }
     }
     
@@ -210,22 +213,25 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
         //var update: [Int: SLNode<Key, Value>] = [:]
         var update = Array<SLNode<Key, Value>?>(count: maxLevel, repeatedValue: nil)
         var x = head
+        var i: Int
         
         // look for the key, and save the previous nodes all the way down in the update[] list
-        for i in (1 ... level).reverse() {
+        i = self.level
+        while i >= 1 {
             while x.next[i-1] != nil && x.next[i-1]!.key < key {
                 x = x.next[i-1]!
             }
             update[i-1] = x
+            i -= 1
         }
         
         // check if run off end of list, nothing to do
-        guard x.nextNode() != nil else {
+        guard x.next[0] != nil else {
             return false
         }
         
         // Point to the node we're maybe going to delete, if it matches
-        x = x.nextNode()!
+        x = x.next[0]!
         
         // Look for a key match
         if x.key != key {
@@ -254,11 +260,13 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
         // Now we've found a value, deleted it, and emptied the values list, we can delete this whole node
 
         // point all the previous node to the new next node
-        for i in 1 ... self.level {
+        i = 1
+        while i <= self.level {
             if update[i-1]!.next[i-1] != nil && update[i-1]!.next[i-1]! !== x {
                 break
             }
             update[i-1]!.next[i-1] = x.next[i-1]
+            i += 1
         }
             
         // if that was the biggest node, and we can see the end of the list from the head,

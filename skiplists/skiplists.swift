@@ -271,7 +271,7 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
             
         // if that was the biggest node, and we can see the end of the list from the head,
         // lower the list until we're pointing at a node
-        while self.level > 1 && self.head.next[self.level] == nil {
+        while self.level > 1 && self.head.next[self.level-1] == nil {
             self.level -= 1
         }
         

@@ -182,12 +182,11 @@ for (key, row) in t.studentIDIndex {
 
 print("\nSpeed test")
 func randomString(length: Int = 6) -> String {
-    let letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    let letters = ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"]
     var string = ""
     for _ in 0..<length {
         let j = Int(drand48() * 26)
-        let index = letters.startIndex.advancedBy(j)
-        string += letters[index...index]
+        string += letters[j]
     }
     return string
 }

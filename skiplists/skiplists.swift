@@ -18,10 +18,9 @@ func SkipListRandomLevel(maxLevel: Int) -> Int {
     return newLevel
 }
 
-func SLmaxLevel(maxNodes: Int) -> Int {
-    let logMaxNodes = log(Double(maxNodes)) / log(1.0 / randomProbability)
-//    print("SLmaxLevel(\(maxNodes)) -> \(logMaxNodes)")
-    return Int(round(logMaxNodes))
+func SkipListMaxLevel(maxNodes: Int) -> Int {
+        let logMaxNodes = log(Double(maxNodes)) / log(1.0 / randomProbability)
+        return Int(round(logMaxNodes))
 }
 
 class SLNode<Key: Comparable, Value: Equatable> {
@@ -71,7 +70,7 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
     }
     
     public convenience init(maxNodes: Int, unique: Bool = false, errorHandler: ((SkipListError<Key>) -> Void)? = nil) {
-        self.init(maxLevel: SLmaxLevel(maxNodes), unique: unique, errorHandler: errorHandler)
+        self.init(maxLevel: SkipListMaxLevel(maxNodes), unique: unique, errorHandler: errorHandler)
     }
     
     func search(greaterThanOrEqualTo key: Key) -> SLNode<Key, Value>? {

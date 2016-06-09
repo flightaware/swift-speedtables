@@ -51,10 +51,6 @@ class TableRow: SpeedTableRow, Equatable {
     func setName(name: String) throws {
         try parent!.nameIndex.replace(name, keyStore: &nameStorage, value: self)
     }
-//    var name: String {
-//        willSet { parent!.nameIndex.delete(name, value: self) }
-//        didSet { parent!.nameIndex.insert(name, value: self) }
-//    }
     var ageStorage: Int
     func getAge() -> Int {
         return ageStorage
@@ -62,10 +58,6 @@ class TableRow: SpeedTableRow, Equatable {
     func setAge(age: Int) throws {
         try parent!.ageIndex.replace(age, keyStore: &ageStorage, value: self)
     }
-//    var age: Int {
-//        willSet { parent!.ageIndex.delete(age, value: self) }
-//        didSet { parent!.ageIndex.insert(age, value: self) }
-//    }
     var school: String? // Unindexed value
     var studentIDStorage: String? // unique optional value
     func getStudentID() -> String? {

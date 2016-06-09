@@ -201,22 +201,23 @@ func randomString(length: Int = 6) -> String {
     }
     return string
 }
-func tare () {
+func forfake () -> Int {
     let t0 = clock()
     var tLast = t0 - t0
     for i in 1...1000000 {
         let name = randomString(6)
         if i % 100000 == 0 {
             let tNext = clock() - t0
-            print("Inserting \(name), \(i) at \(Int(tNext) - Int(tLast))µs")
+            print("Not inserting \(name), \(i) at \(Int(tNext) - Int(tLast))µs")
             tLast = tNext
         }
     }
     let tFinal = clock() - t0
-    print("Total \(tFinal)µs")
+    print("Total for fake \(tFinal)µs")
+    return Int(tFinal)
 }
-tare()
-func forreals() {
+let overhead = forfake()
+func forreals() -> Int {
     let t0 = clock()
     var tLast = t0 - t0
     for i in 1...1000000 {
@@ -229,6 +230,7 @@ func forreals() {
         l.insert(name, value: String(i))
     }
     let tFinal = clock() - t0
-    print("Total \(tFinal)µs")
+    print("Total for real \(tFinal)µs")
+    return Int(tFinal)
 }
-forreals()
+print("Delta: \(forreals() - overhead)")

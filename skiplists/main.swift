@@ -10,7 +10,7 @@ import Foundation
 
 print("Basic skiplist test")
 
-let l = SkipList<String, String>(maxLevel: 6)
+let l = SkipList<String, String>(maxLevel: 20)
 
 print("\nPopulating list.")
 l.insert("hello", value: "I say hello")
@@ -49,7 +49,7 @@ for (key, value) in l {
 
 print("\n\nSpeedtables test")
 
-let t = Table(size: 100)
+let t = Table(size: 1000000)
 
 print("Adding cartoon characters")
 t.insert("Nick", age: 32) // "200 dollars a day since I was twelve"
@@ -179,3 +179,56 @@ print("Final student IDs")
 for (key, row) in t.studentIDIndex {
     print("Name: \(row.name) ID: \(key)")
 }
+
+print("\nSpeed test")
+extension String {
+    subscript (r: Range<Int>) -> String {
+        get {
+            let startIndex = self.startIndex.advancedBy(r.startIndex)
+            let endIndex = startIndex.advancedBy(r.endIndex - r.startIndex)
+            
+            return self[startIndex..<endIndex]
+        }
+    }
+}
+
+func randomString(length: Int = 6) -> String {
+    let letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    var string = ""
+    for _ in 0..<length {
+        let j = Int(drand48() * 26)
+        string += letters[j...j]
+    }
+    return string
+}
+func tare () {
+    let t0 = clock()
+    var tLast = t0 - t0
+    for i in 1...1000000 {
+        let name = randomString(6)
+        if i % 100000 == 0 {
+            let tNext = clock() - t0
+            print("Inserting \(name), \(i) at \(Int(tNext) - Int(tLast))µs")
+            tLast = tNext
+        }
+    }
+    let tFinal = clock() - t0
+    print("Total \(tFinal)µs")
+}
+tare()
+func forreals() {
+    let t0 = clock()
+    var tLast = t0 - t0
+    for i in 1...1000000 {
+        let name = randomString(6)
+        if i % 100000 == 0 {
+            let tNext = clock() - t0
+            print("Inserting \(name), \(i) at \(Int(tNext) - Int(tLast))µs")
+            tLast = tNext
+        }
+        l.insert(name, value: String(i))
+    }
+    let tFinal = clock() - t0
+    print("Total \(tFinal)µs")
+}
+forreals()

@@ -10,7 +10,7 @@ import Foundation
 
 let randomProbability = 0.5
 
-func SLrandomLevel(maxLevel: Int) -> Int {
+func SkipListRandomLevel(maxLevel: Int) -> Int {
     var newLevel = 1
     while drand48() < randomProbability && newLevel < maxLevel {
         newLevel += 1
@@ -18,7 +18,7 @@ func SLrandomLevel(maxLevel: Int) -> Int {
     return newLevel
 }
 
-func SLmaxLevel(maxNodes: Int) -> Int {
+func SkipListMaxLevel(maxNodes: Int) -> Int {
         let logMaxNodes = log(Double(maxNodes)) / log(1.0 / randomProbability)
         return Int(round(logMaxNodes))
 }
@@ -31,7 +31,7 @@ class SLNode<Key: Comparable, Value: Equatable> {
     init(_ key: Key?, value: Value? = nil, maxLevel: Int, level: Int = 0) {
         self.key = key
         self.values = (value == nil) ? [] : [value!]
-        self.level = (level > 0) ? level : SLrandomLevel(maxLevel)
+        self.level = (level > 0) ? level : SkipListRandomLevel(maxLevel)
         self.next = Array<SLNode<Key, Value>?>(count: maxLevel, repeatedValue: nil)
     }
     
@@ -70,7 +70,7 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
     }
     
     public convenience init(maxNodes: Int, unique: Bool = false, errorHandler: ((SkipListError<Key>) -> Void)? = nil) {
-        self.init(maxLevel: SLmaxLevel(maxNodes), unique: unique, errorHandler: errorHandler)
+        self.init(maxLevel: SkipListMaxLevel(maxNodes), unique: unique, errorHandler: errorHandler)
     }
     
     func search(greaterThanOrEqualTo key: Key) -> SLNode<Key, Value>? {
@@ -213,7 +213,7 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
         }
         
         // Pick a random level for the new node
-        let level = SLrandomLevel(maxLevel)
+        let level = SkipListRandomLevel(maxLevel)
         
         // If the new node is higher than the current level, fill up the update[] list
         // with head

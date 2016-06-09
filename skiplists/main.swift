@@ -49,7 +49,7 @@ for (key, value) in l {
 
 print("\n\nSpeedtables test")
 
-let t = Table(maxLevel: 20)
+let t = Table(size: 100000)
 
 print("Adding cartoon characters")
 t.insert("Nick", age: 32) // "200 dollars a day since I was twelve"

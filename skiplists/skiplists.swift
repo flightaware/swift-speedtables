@@ -124,7 +124,7 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
         }
     }
     
-    // Replace an entry in a skiplist
+    // Replace an entry in a skiplist - for optional keys
     public func replace(newKey: Key?, inout keyStore: Key?, value: Value) throws {
         // no change - no work
         if newKey == keyStore {
@@ -148,6 +148,26 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
         if let k = newKey {
             insert(k, value: value)
         }
+    }
+    
+    // Replace an entry in a skiplist - for non-optional keys
+    public func replace(newKey: Key, inout keyStore: Key, value: Value) throws {
+        // no change - no work
+        if newKey == keyStore {
+            return
+        }
+        
+        // If it's supposed to be unique, throw an error if it's not
+        if unique {
+            if exists(newKey) {
+                throw SkipListError.KeyNotUnique(key: newKey)
+            }
+        }
+        
+        // showtime -- remove the old entry, update the keystore, insert the new value
+        delete(keyStore, value: value)
+        keyStore = newKey
+        insert(keyStore, value: value)
     }
     
     public func insert(key: Key, value newValue: Value) {

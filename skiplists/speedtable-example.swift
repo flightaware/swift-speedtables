@@ -44,14 +44,28 @@ class Table: SpeedTable {
 // the row holding the data
 class TableRow: SpeedTableRow, Equatable {
     var parent: Table?
-    var name: String {
-        willSet { parent!.nameIndex.delete(name, value: self) }
-        didSet { parent!.nameIndex.insert(name, value: self) }
+    var nameStorage: String
+    func getName() -> String {
+        return nameStorage
     }
-    var age: Int {
-        willSet { parent!.ageIndex.delete(age, value: self) }
-        didSet { parent!.ageIndex.insert(age, value: self) }
+    func setName(name: String) throws {
+        try parent!.nameIndex.replace(name, keyStore: &nameStorage, value: self)
     }
+//    var name: String {
+//        willSet { parent!.nameIndex.delete(name, value: self) }
+//        didSet { parent!.nameIndex.insert(name, value: self) }
+//    }
+    var ageStorage: Int
+    func getAge() -> Int {
+        return ageStorage
+    }
+    func setAge(age: Int) throws {
+        try parent!.ageIndex.replace(age, keyStore: &ageStorage, value: self)
+    }
+//    var age: Int {
+//        willSet { parent!.ageIndex.delete(age, value: self) }
+//        didSet { parent!.ageIndex.insert(age, value: self) }
+//    }
     var school: String? // Unindexed value
     var studentIDStorage: String? // unique optional value
     func getStudentID() -> String? {
@@ -62,16 +76,15 @@ class TableRow: SpeedTableRow, Equatable {
     }
     init(parent: Table, name: String, age: Int) {
         self.parent = parent
-        self.name = name
-        self.age = age
-        // This needs to be done explicitly because the willSet/didSet doesn't
-        // fire on initialization.
-        parent.nameIndex.insert(self.name, value: self)
-        parent.ageIndex.insert(self.age, value: self)
+        // We set these directly because the setter requires the index key be initialized
+        self.nameStorage = name
+        self.ageStorage = age
+        parent.nameIndex.insert(name, value: self)
+        parent.ageIndex.insert(age, value: self)
     }
     func delete() {
-        parent!.nameIndex.delete(name, value: self)
-        parent!.ageIndex.delete(age, value:self)
+        parent!.nameIndex.delete(nameStorage, value: self)
+        parent!.ageIndex.delete(ageStorage, value:self)
         if let ID = studentIDStorage {
             parent!.studentIDIndex.delete(ID, value:self)
         }

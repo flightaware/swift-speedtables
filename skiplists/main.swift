@@ -181,23 +181,13 @@ for (key, row) in t.studentIDIndex {
 }
 
 print("\nSpeed test")
-extension String {
-    subscript (r: Range<Int>) -> String {
-        get {
-            let startIndex = self.startIndex.advancedBy(r.startIndex)
-            let endIndex = startIndex.advancedBy(r.endIndex - r.startIndex)
-            
-            return self[startIndex..<endIndex]
-        }
-    }
-}
-
 func randomString(length: Int = 6) -> String {
     let letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     var string = ""
     for _ in 0..<length {
         let j = Int(drand48() * 26)
-        string += letters[j...j]
+        let index = letters.startIndex.advancedBy(j)
+        string += letters[index...index]
     }
     return string
 }

@@ -49,7 +49,7 @@ for (key, value) in l {
 
 print("\n\nSpeedtables test")
 
-let t = Table(size: 1000000)
+let t = Table(maxLevel: 20)
 
 print("Adding cartoon characters")
 t.insert("Nick", age: 32) // "200 dollars a day since I was twelve"
@@ -207,7 +207,7 @@ func forfake () -> Int {
     return Int(tFinal)
 }
 let overhead = forfake()
-func forreals() -> Int {
+func forskiplists() -> Int {
     let t0 = clock()
     var tLast = t0 - t0
     for i in 1...1000000 {
@@ -220,7 +220,27 @@ func forreals() -> Int {
         l.insert(name, value: String(i))
     }
     let tFinal = clock() - t0
-    print("Total for real \(tFinal)µs")
+    print("Total for skiplists \(tFinal)µs")
     return Int(tFinal)
 }
-print("Delta: \(forreals() - overhead)")
+let skiplists = forskiplists()
+print("Skiplists delta: \(skiplists - overhead)µs, \(((skiplists - overhead) / overhead) * 100)%")
+func forspeedtables() -> Int {
+    let t0 = clock()
+    var tLast = t0 - t0
+    for i in 1...1000000 {
+        let name = randomString(6)
+        if i % 100000 == 0 {
+            let tNext = clock() - t0
+            print("Inserting \(name), \(i) at \(Int(tNext) - Int(tLast))µs")
+            tLast = tNext
+        }
+        t.insert(name, age: i)
+    }
+    let tFinal = clock() - t0
+    print("Total for speedtables \(tFinal)µs")
+    return Int(tFinal)
+}
+let speedtables = forspeedtables()
+print("Speedtables delta: \(speedtables - overhead)µs, \(((speedtables - overhead) / overhead) * 100)%")
+

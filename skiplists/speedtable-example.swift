@@ -20,10 +20,15 @@ class Table: SpeedTable {
     let nameIndex: SkipList<String, TableRow>
     let ageIndex: SkipList<Int, TableRow>
     let studentIDIndex: SkipList<String, TableRow>
+    init(maxLevel: Int) {
+        nameIndex = SkipList<String, TableRow>(maxLevel: maxLevel, unique: false)
+        ageIndex = SkipList<Int, TableRow>(maxLevel: maxLevel, unique: false)
+        studentIDIndex = SkipList<String, TableRow>(maxLevel: maxLevel, unique: true)
+    }
     init(size: Int) {
-        nameIndex = SkipList<String, TableRow>(maxLevel: size, unique: false)
-        ageIndex = SkipList<Int, TableRow>(maxLevel: size, unique: false)
-        studentIDIndex = SkipList<String, TableRow>(maxLevel: size, unique: true)
+        nameIndex = SkipList<String, TableRow>(maxNodes: size, unique: false)
+        ageIndex = SkipList<Int, TableRow>(maxNodes: size, unique: false)
+        studentIDIndex = SkipList<String, TableRow>(maxNodes: size, unique: true)
     }
     func insert(name: String, age: Int) -> TableRow {
         // Creating the table row does all the insertion stuff

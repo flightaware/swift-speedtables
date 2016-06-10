@@ -23,28 +23,40 @@ func SkipListMaxLevel(maxNodes: Int) -> Int {
         return Int(round(logMaxNodes))
 }
 
-class SLNode<Key: Comparable, Value: Equatable> {
+struct SLNode<Key: Comparable, Value: Equatable> {
     let key: Key?
     var values: [Value]
     var level: Int
-    var next: [Unmanaged<SLNode<Key, Value>>?]
+    var next: [UnsafeMutablePointer<SLNode<Key, Value>>?]
     init(_ key: Key?, value: Value? = nil, maxLevel: Int, level: Int = 0) {
         self.key = key
         self.values = (value == nil) ? [] : [value!]
         self.level = (level > 0) ? level : SkipListRandomLevel(maxLevel)
-        self.next = Array<Unmanaged<SLNode<Key, Value>>?>(count: maxLevel, repeatedValue: nil)
+        self.next = Array<UnsafeMutablePointer<SLNode<Key, Value>>?>(count: maxLevel, repeatedValue: nil)
     }
     
     func nextNode() -> SLNode<Key, Value>? {
-        return next[0] == nil ? nil : next[0]!.takeUnretainedValue()
+        return next[0] == nil ? nil : next[0]!.memory
     }
 }
+
+func allocateSkipListNode<Key, Value>(key: Key?, value: Value? = nil, maxLevel: Int, level: Int = 0) -> UnsafeMutablePointer<SLNode<Key, Value>> {
+    let newNode = UnsafeMutablePointer<SLNode<Key, Value>>(malloc(sizeof(SLNode<Key, Value>)))
+    newNode.initialize(SLNode<Key, Value>(key, value: value, maxLevel: maxLevel, level: level))
+    return newNode
+}
+
+func freeSkipListNode<Key, Value>(node: UnsafeMutablePointer<SLNode<Key, Value>>) {
+    node.destroy()
+    free(node)
+}
+
 
 // Can't use a generic typealias here until Swift 3
 //typealias ErrorHandler<Key: Comparable> = (SkipListError<Key>) -> Void
 
 public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
-    let head: SLNode<Key, Value>
+    let head: UnsafeMutablePointer<SLNode<Key, Value>>
     let unique: Bool
     let errorHandler: ((SkipListError<Key>) -> Void)?
     var maxLevel: Int
@@ -55,7 +67,7 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
         self.level = 1
         self.unique = unique
         self.errorHandler = errorHandler
-        self.head = SLNode<Key, Value>(nil, maxLevel: maxLevel, level: maxLevel)
+        self.head = allocateSkipListNode(nil, maxLevel: maxLevel, level: maxLevel)
     }
     
     public convenience init(maxNodes: Int, unique: Bool = false, errorHandler: ((SkipListError<Key>) -> Void)? = nil) {
@@ -63,50 +75,51 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
     }
     
     deinit {
-        // Walk the skiplist and release all the nodes
-        var x = head.next[0]
+        // Walk the skiplist and release all the nodes, including head
+        var x: UnsafeMutablePointer<SLNode<Key, Value>>? = head
         while x != nil {
-            let xnext = x?.takeUnretainedValue().next[0]
-            x!.release()
-            x = xnext
+            let xnext = x!.memory.next[0]
+            x!.destroy()
+            free(x!)
+            x = xnext!
         }
     }
     
-    func search(greaterThanOrEqualTo key: Key) -> SLNode<Key, Value>? {
+    func search(greaterThanOrEqualTo key: Key) -> UnsafeMutablePointer<SLNode<Key, Value>>? {
         var x = head
         
         // look for the key
         for i in (1 ... self.level).reverse() {
-            while x.next[i-1] != nil && x.next[i-1]!.takeUnretainedValue().key < key {
-                x = x.next[i-1]!.takeUnretainedValue()
+            while x.memory.next[i-1] != nil && x.memory.next[i-1]!.memory.key < key {
+                x = x.memory.next[i-1]!
             }
         }
         
         // have we run off the end?
-        guard x.next[0] != nil else {
+        guard x.memory.next[0] != nil else {
             return nil
         }
         
         // no, are we looking at a valid node?
-        x = x.next[0]!.takeUnretainedValue()
+        x = x.memory.next[0]!
         
         return x
     }
     
     public func search(greaterThanOrEqualTo key: Key) -> [Value] {
-        let x: SLNode<Key, Value>? = search(greaterThanOrEqualTo: key)
-        if let array = x?.values {
+        let x: UnsafeMutablePointer<SLNode<Key, Value>>? = search(greaterThanOrEqualTo: key)
+        if let array = x?.memory.values {
             return array
         } else {
             return []
         }
     }
     
-    func search(equalTo key: Key) -> SLNode<Key, Value>? {
-        let x: SLNode<Key, Value>? = search(greaterThanOrEqualTo: key)
+    func search(equalTo key: Key) -> UnsafeMutablePointer<SLNode<Key, Value>>? {
+        let x: UnsafeMutablePointer<SLNode<Key, Value>>? = search(greaterThanOrEqualTo: key)
 
         // Check for an exact match
-        if x != nil && x!.key == key {
+        if x != nil && x!.memory.key == key {
             return x
         } else {
             return nil
@@ -114,13 +127,13 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
     }
     
     public func exists(key: Key) -> Bool {
-        let x: SLNode<Key, Value>? = search(equalTo: key)
+        let x: UnsafeMutablePointer<SLNode<Key, Value>>? = search(equalTo: key)
         return x != nil
     }
     
     public func search(equalTo key: Key) -> [Value] {
-        let x: SLNode<Key, Value>? = search(equalTo: key)
-        if let array = x?.values {
+        let x: UnsafeMutablePointer<SLNode<Key, Value>>? = search(equalTo: key)
+        if let array = x?.memory.values {
             return array
         } else {
             return []
@@ -174,39 +187,39 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
     }
         
     public func insert(key: Key, value newValue: Value) {
-        var update = Array<SLNode<Key, Value>?>(count: maxLevel, repeatedValue: nil)
+        var update = Array<UnsafeMutablePointer<SLNode<Key, Value>>?>(count: maxLevel, repeatedValue: nil)
         var x = head
         var i: Int
         
         // look for the key, and save the previous nodes all the way down in the update[] list
         i = self.level
         while i >= 1 {
-            while x.next[i-1] != nil && x.next[i-1]!.takeUnretainedValue().key < key {
-                x = x.next[i-1]!.takeUnretainedValue()
+            while x.memory.next[i-1] != nil && x.memory.next[i-1]!.memory.key < key {
+                x = x.memory.next[i-1]!
             }
             update[i-1] = x
             i -= 1
         }
         
         // If we haven't run off the end...
-        if x.next[0] != nil {
-            x = x.next[0]!.takeUnretainedValue()
+        if x.memory.next[0] != nil {
+            x = x.memory.next[0]!
             
             // If we're looking at the right key already, then there's nothing to insert. Just add
             // the new value to the values array.
-            if x.key == key {
+            if x.memory.key == key {
                 if unique {
                     if errorHandler != nil {
                         errorHandler!(SkipListError<Key>.KeyNotUnique(key: key))
                     }
                     return
                 }
-                for i in 0 ..< x.values.count {
-                    if newValue == x.values[i] {
+                for i in 0 ..< x.memory.values.count {
+                    if newValue == x.memory.values[i] {
                         return
                     }
                 }
-                x.values += [newValue]
+                x.memory.values += [newValue]
                 return
             }
         }
@@ -222,47 +235,47 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
         }
         
         // make a new node and patch it in to the saved nodes in the update[] list
-        let newNode = SLNode<Key, Value>(key, value: newValue, maxLevel: maxLevel, level: level)
+        let newNode = allocateSkipListNode(key, value: newValue, maxLevel: maxLevel, level: level)
         i = 1
         while i <= level {
-            newNode.next[i-1] = update[i-1]!.next[i-1]
-            update[i-1]!.next[i-1] = Unmanaged.passRetained(newNode)
+            newNode.memory.next[i-1] = update[i-1]!.memory.next[i-1]
+            update[i-1]!.memory.next[i-1] = newNode
             i += 1
         }
     }
     
     public func delete(key: Key, value: Value) -> Bool {
-        var update = Array<SLNode<Key, Value>?>(count: maxLevel, repeatedValue: nil)
+        var update = Array<UnsafeMutablePointer<SLNode<Key, Value>>?>(count: maxLevel, repeatedValue: nil)
         var x = head
         var i: Int
         
         // look for the key, and save the previous nodes all the way down in the update[] list
         i = self.level
         while i >= 1 {
-            while x.next[i-1] != nil && x.next[i-1]!.takeUnretainedValue().key < key {
-                x = x.next[i-1]!.takeUnretainedValue()
+            while x.memory.next[i-1] != nil && x.memory.next[i-1]!.memory.key < key {
+                x = x.memory.next[i-1]!
             }
             update[i-1] = x
             i -= 1
         }
         
         // check if run off end of list, nothing to do
-        guard x.next[0] != nil else {
+        guard x.memory.next[0] != nil else {
             return false
         }
         
         // Point to the node we're maybe going to delete, if it matches
-        x = x.next[0]!.takeUnretainedValue()
+        x = x.memory.next[0]!
         
         // Look for a key match
-        if x.key != key {
+        if x.memory.key != key {
             return false
         }
         
         // look for match in values
         var foundIndex = -1
-        for i in 0..<x.values.count {
-            if x.values[i] == value {
+        for i in 0..<x.memory.values.count {
+            if x.memory.values[i] == value {
                 foundIndex = i
             }
         }
@@ -273,8 +286,8 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
         }
         
         // Remove the value we found, and if it wasn't the last one return success
-        x.values.removeAtIndex(foundIndex)
-        if(x.values.count > 0) {
+        x.memory.values.removeAtIndex(foundIndex)
+        if(x.memory.values.count > 0) {
             return true
         }
 
@@ -283,21 +296,21 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
         // point all the previous node to the new next node
         i = 1
         while i <= self.level {
-            if update[i-1]!.next[i-1] != nil && update[i-1]!.next[i-1]!.takeUnretainedValue() !== x {
+            if update[i-1]!.memory.next[i-1] != nil && update[i-1]!.memory.next[i-1] != x {
                 break
             }
-            update[i-1]!.next[i-1] = x.next[i-1]
+            update[i-1]!.memory.next[i-1] = x.memory.next[i-1]
             i += 1
         }
             
         // if that was the biggest node, and we can see the end of the list from the head,
         // lower the list until we're pointing at a node
-        while self.level > 1 && self.head.next[self.level-1] == nil {
+        while self.level > 1 && self.head.memory.next[self.level-1] == nil {
             self.level -= 1
         }
         
         // Dispose of the node, because we're doing memory management
-        Unmanaged.passUnretained(x).release()
+        freeSkipListNode(x)
         
         return true
     }
@@ -307,16 +320,16 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
         var index = -1
         
         return AnyGenerator<(Key, Value)> {
-            if index < 0 || index >= row.values.count {
+            if index < 0 || index >= row.memory.values.count {
                 repeat {
-                    guard row.nextNode() != nil else { return nil }
-                    row = row.nextNode()!
-                } while row.values.count == 0
+                    guard row.memory.next[0] != nil else { return nil }
+                    row = row.memory.next[0]!
+                } while row.memory.values.count == 0
                 index = 0
             }
-            let next = row.values[index]
+            let next = row.memory.values[index]
             index += 1
-            return (row.key!, next)
+            return (row.memory.key!, next)
         }
     }
     

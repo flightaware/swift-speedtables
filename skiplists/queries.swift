@@ -9,10 +9,10 @@
 import Foundation
 
 private struct QueryState<Key: Comparable, Value: Equatable> {
-    var node: SLNode<Key, Value>? = nil
+    var node: UnsafeMutablePointer<SLNode<Key, Value>>? = nil
     var index: Int = -1
     
-    private init(node: SLNode<Key, Value>?) {
+    private init(node: UnsafeMutablePointer<SLNode<Key, Value>>?) {
         self.node = node
         self.index = -1
     }
@@ -36,14 +36,14 @@ public class Query<Key: Comparable, Value: Equatable>: SequenceType {
     }
     
     private func start() -> QueryState<Key, Value> {
-        var node: SLNode<Key, Value>?
+        var node: UnsafeMutablePointer<SLNode<Key, Value>>?
 
         if min == nil {
-            node = list.head.nextNode()
+            node = list.head.memory.next[0]
         } else {
             node = list.search(greaterThanOrEqualTo: min!)
-            if node != nil && minEqual == false && node!.key == min {
-                node = node!.nextNode()
+            if node != nil && minEqual == false && node!.memory.key == min {
+                node = node!.memory.next[0]
             }
         }
         return QueryState<Key, Value>(node: node)
@@ -56,8 +56,8 @@ public class Query<Key: Comparable, Value: Equatable>: SequenceType {
         state.index += 1
         
         // if we've stepped past the current node's values, keep stepping until we get a node with values
-        while state.node != nil && state.index >= state.node!.values.count {
-            state.node = state.node!.nextNode()
+        while state.node != nil && state.index >= state.node!.memory.values.count {
+            state.node = state.node!.memory.next[0]
             state.index = 0
         }
         
@@ -68,11 +68,11 @@ public class Query<Key: Comparable, Value: Equatable>: SequenceType {
         if max == nil { return }
         
         if maxEqual {
-            if max < state.node!.key {
+            if max < state.node!.memory.key {
                 state.node = nil
             }
         } else {
-            if max <= state.node!.key {
+            if max <= state.node!.memory.key {
                 state.node = nil
             }
         }
@@ -92,7 +92,7 @@ public class Query<Key: Comparable, Value: Equatable>: SequenceType {
         
         guard state.node != nil else { return nil }
         
-        return (state.node!.key!, state.node!.values[state.index])
+        return (state.node!.memory.key!, state.node!.memory.values[state.index])
     }
     
     public func generate() -> AnyGenerator<(Key, Value)> {
@@ -103,7 +103,7 @@ public class Query<Key: Comparable, Value: Equatable>: SequenceType {
             
             guard state.node != nil else { return nil }
             
-            return (state.node!.key!, state.node!.values[state.index])
+            return (state.node!.memory.key!, state.node!.memory.values[state.index])
         }
     }
 }

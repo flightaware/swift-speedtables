@@ -27,27 +27,16 @@ class SLNode<Key: Comparable, Value: Equatable> {
     let key: Key?
     var values: [Value]
     var level: Int
-    var next: [SLNode<Key, Value>?]
+    var next: [Unmanaged<SLNode<Key, Value>>?]
     init(_ key: Key?, value: Value? = nil, maxLevel: Int, level: Int = 0) {
         self.key = key
         self.values = (value == nil) ? [] : [value!]
         self.level = (level > 0) ? level : SkipListRandomLevel(maxLevel)
-        self.next = Array<SLNode<Key, Value>?>(count: maxLevel, repeatedValue: nil)
+        self.next = Array<Unmanaged<SLNode<Key, Value>>?>(count: maxLevel, repeatedValue: nil)
     }
     
     func nextNode() -> SLNode<Key, Value>? {
-        return next[0]
-    }
-    
-    func dump(tag: String, verbose: Bool = false) {
-        print("\(tag) = Node(\(key) with \(values.count) values")
-        if(verbose) {
-            var i = 0
-            while i <= values.count {
-                print("    \(values[i])")
-                i += 1
-            }
-        }
+        return next[0] == nil ? nil : next[0]!.takeUnretainedValue()
     }
 }
 
@@ -73,13 +62,23 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
         self.init(maxLevel: SkipListMaxLevel(maxNodes), unique: unique, errorHandler: errorHandler)
     }
     
+    deinit {
+        // Walk the skiplist and release all the nodes
+        var x = head.next[0]
+        while x != nil {
+            let xnext = x?.takeUnretainedValue().next[0]
+            x!.release()
+            x = xnext
+        }
+    }
+    
     func search(greaterThanOrEqualTo key: Key) -> SLNode<Key, Value>? {
         var x = head
         
         // look for the key
         for i in (1 ... self.level).reverse() {
-            while x.next[i-1] != nil && x.next[i-1]!.key < key {
-                x = x.next[i-1]!
+            while x.next[i-1] != nil && x.next[i-1]!.takeUnretainedValue().key < key {
+                x = x.next[i-1]!.takeUnretainedValue()
             }
         }
         
@@ -89,7 +88,7 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
         }
         
         // no, are we looking at a valid node?
-        x = x.next[0]!
+        x = x.next[0]!.takeUnretainedValue()
         
         return x
     }
@@ -182,8 +181,8 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
         // look for the key, and save the previous nodes all the way down in the update[] list
         i = self.level
         while i >= 1 {
-            while x.next[i-1] != nil && x.next[i-1]!.key < key {
-                x = x.next[i-1]!
+            while x.next[i-1] != nil && x.next[i-1]!.takeUnretainedValue().key < key {
+                x = x.next[i-1]!.takeUnretainedValue()
             }
             update[i-1] = x
             i -= 1
@@ -191,7 +190,7 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
         
         // If we haven't run off the end...
         if x.next[0] != nil {
-            x = x.next[0]!
+            x = x.next[0]!.takeUnretainedValue()
             
             // If we're looking at the right key already, then there's nothing to insert. Just add
             // the new value to the values array.
@@ -227,7 +226,7 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
         i = 1
         while i <= level {
             newNode.next[i-1] = update[i-1]!.next[i-1]
-            update[i-1]!.next[i-1] = newNode
+            update[i-1]!.next[i-1] = Unmanaged.passRetained(newNode)
             i += 1
         }
     }
@@ -240,8 +239,8 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
         // look for the key, and save the previous nodes all the way down in the update[] list
         i = self.level
         while i >= 1 {
-            while x.next[i-1] != nil && x.next[i-1]!.key < key {
-                x = x.next[i-1]!
+            while x.next[i-1] != nil && x.next[i-1]!.takeUnretainedValue().key < key {
+                x = x.next[i-1]!.takeUnretainedValue()
             }
             update[i-1] = x
             i -= 1
@@ -253,7 +252,7 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
         }
         
         // Point to the node we're maybe going to delete, if it matches
-        x = x.next[0]!
+        x = x.next[0]!.takeUnretainedValue()
         
         // Look for a key match
         if x.key != key {
@@ -284,7 +283,7 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
         // point all the previous node to the new next node
         i = 1
         while i <= self.level {
-            if update[i-1]!.next[i-1] != nil && update[i-1]!.next[i-1]! !== x {
+            if update[i-1]!.next[i-1] != nil && update[i-1]!.next[i-1]!.takeUnretainedValue() !== x {
                 break
             }
             update[i-1]!.next[i-1] = x.next[i-1]
@@ -296,6 +295,9 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
         while self.level > 1 && self.head.next[self.level-1] == nil {
             self.level -= 1
         }
+        
+        // Dispose of the node, because we're doing memory management
+        Unmanaged.passUnretained(x).release()
         
         return true
     }

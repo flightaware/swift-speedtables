@@ -214,12 +214,13 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
                     }
                     return
                 }
-                for i in 0 ..< x.memory.values.count {
-                    if newValue == x.memory.values[i] {
-                        return
-                    }
+
+                if x.memory.values.contains(newValue) {
+                    return
                 }
+
                 x.memory.values += [newValue]
+
                 return
             }
         }
@@ -273,20 +274,15 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
         }
         
         // look for match in values
-        var foundIndex = -1
-        for i in 0..<x.memory.values.count {
-            if x.memory.values[i] == value {
-                foundIndex = i
-            }
-        }
+        let foundIndex = x.memory.values.indexOf(value)
         
         // If we didn't find a matching value, we didn't actually find a match
-        if(foundIndex == -1) {
+        if(foundIndex == nil) {
             return false
         }
         
         // Remove the value we found, and if it wasn't the last one return success
-        x.memory.values.removeAtIndex(foundIndex)
+        x.memory.values.removeAtIndex(foundIndex!)
         if(x.memory.values.count > 0) {
             return true
         }

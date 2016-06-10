@@ -151,3 +151,17 @@ generator implied above, or the functions:
 * ```(key, value)? = query.first()```
 * ```(key, value)? = query.next()```
 
+Performance:
+
+Currently performance of Skiplists in Swift are about 1/10th the performance of Skiplists in C. There are a number of reasons for this:
+
+1. It's proving very difficult to avoid redundant retains and releases while stepping through the list. Various code tweaks have reduced this by a factor of about 10 from the original implementation, at the cost of safety. The best performance is in the "unmanaged" branch..
+
+2. Similarly, the C code does no bounds checking on arrays. Swift does so on every access.
+
+3. The C code is using completely preallocated arrays, so an insert only needs to allocate a fixed length record and possibly a copy of the key. Swift has to call initializers for arrays, strings, keys, and values.
+
+
+Notes:
+
+On performing a deletion, it would seem only necessary to update the next pointer as far as the level of the node being deleted. The Skiplist paper updated all the way to the highest level in the list. 

@@ -291,7 +291,7 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
 
         // point all the previous node to the new next node
         i = 1
-        while i <= self.level {
+        while i <= self.level { // The skiplist paper says this goes up to list->level, not x->level ?
             if update[i-1]!.memory.next[i-1] != nil && update[i-1]!.memory.next[i-1] != x {
                 break
             }

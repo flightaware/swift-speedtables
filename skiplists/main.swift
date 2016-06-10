@@ -49,7 +49,7 @@ for (key, value) in l {
 
 print("\n\nSpeedtables test")
 
-let t = Table(maxLevel: 20)
+let t = Table(size: 100000)
 
 print("Adding cartoon characters")
 t.insert("Nick", age: 32) // "200 dollars a day since I was twelve"
@@ -64,13 +64,13 @@ t.insert("bugs", age: year - 1940) // A Wild Hare
 
 print("Looking for 5 year olds")
 for row in t.ageIndex.search(equalTo: 5) {
-    print("Name: \(row.name), age: \(row.age)")
+    print("Name: \(row.getName()), age: \(row.getAge())")
 }
 
 print("Change chip's age to 6,, and make sure there is only one chip")
 let chips: [TableRow] = t.nameIndex.search(equalTo: "chip")
 if(chips.count == 1) {
-    chips[0].age = 6
+    try chips[0].setAge(6)
 } else {
     print("OOPS! chips.count(\(chips.count)) should be 1")
 }
@@ -97,7 +97,7 @@ t.insert("dracula", age: year - 1992) // Gary Oldman
 
 print("Wait on, we can't have 500 year old schoolkids!")
 for row in t.ageIndex.search(equalTo: 500) {
-    print("Deleting impossible entry \(row.name), \(row.age)")
+    print("Deleting impossible entry \(row.getName()), \(row.getAge())")
     t.delete(row)
 }
 
@@ -108,7 +108,7 @@ for (key, row) in t.nameIndex {
         print("  Key: \(key)")
         lastName = key
     }
-    print("    Name: \(row.name), age: \(row.age)")
+    print("    Name: \(row.getName()), age: \(row.getAge())")
 }
 print("Walking ageIndex:")
 var lastAge = -1
@@ -117,21 +117,21 @@ for (key, row) in t.ageIndex {
         print("  Key: \(key)")
         lastAge = key
     }
-    print("    Name: \(row.name), age: \(row.age)")
+    print("    Name: \(row.getName()), age: \(row.getAge())")
 }
 
 print("Queries...")
 print("  Query: age from: 8 to: 50 // not including 50")
 for (key, row) in t.ageIndex.query(from: 8, to: 50) {
-    print("    Name: \(row.name), age: \(row.age)")
+    print("    Name: \(row.getName()), age: \(row.getAge())")
 }
 print("  Query: age from: 8 through: 50 // including 50")
 for (key, row) in t.ageIndex.query(from: 8, through: 50) {
-    print("    Name: \(row.name), age: \(row.age)")
+    print("    Name: \(row.getName()), age: \(row.getAge())")
 }
 print("  Query: name from: \"A\" through: \"Z~\")")
 for (key, row) in t.nameIndex.query(from: "A", through: "Z~") {
-    print("    Name: \(row.name), age: \(row.age)")
+    print("    Name: \(row.getName()), age: \(row.getAge())")
 }
 
 print("Unique and optional columns")
@@ -142,7 +142,7 @@ for (key, row) in t.nameIndex {
 }
 print("Initial student IDs")
 for (key, row) in t.studentIDIndex {
-    print("Name: \(row.name) ID: \(key)")
+    print("Name: \(row.getName()) ID: \(key)")
 }
 print("Setting dracula to XXXXXXXX - should have several failures")
 for row in t.nameIndex.search(equalTo: "dracula") {
@@ -167,17 +167,17 @@ for row in t.nameIndex.search(equalTo: "mickey") { t.delete(row) }
 print("Deleting young draculas (no Student ID index)")
 var rows: [TableRow] = t.nameIndex.search(equalTo: "dracula")
 for row in rows {
-    if row.age < 50 {
+    if row.getAge() < 50 {
         t.delete(row)
     }
 }
 print("Final entries")
 for (key, row) in t.nameIndex {
-    print("Name: \(key), Age: \(row.age), ID: \(row.getStudentID())")
+    print("Name: \(key), Age: \(row.getAge()), ID: \(row.getStudentID())")
 }
 print("Final student IDs")
 for (key, row) in t.studentIDIndex {
-    print("Name: \(row.name) ID: \(key)")
+    print("Name: \(row.getName()) ID: \(key)")
 }
 
 print("\nSpeed test")

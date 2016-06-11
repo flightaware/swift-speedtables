@@ -79,8 +79,7 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
         var x: UnsafeMutablePointer<SLNode<Key, Value>>? = head
         while x != nil {
             let xnext = x!.memory.next[0]
-            x!.destroy()
-            free(x!)
+            freeSkipListNode(x!)
             x = xnext!
         }
     }

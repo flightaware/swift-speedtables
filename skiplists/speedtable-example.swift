@@ -17,16 +17,16 @@ import Foundation
 //     String studentID unique optional indexed
 // )
 class Table: SpeedTable {
-    let nameIndex: SkipList<String, TableRow>
+    let nameIndex: StringSkipList<TableRow>
     let ageIndex: SkipList<Int, TableRow>
     let studentIDIndex: SkipList<String, TableRow>
     init(maxLevel: Int) {
-        nameIndex = SkipList<String, TableRow>(maxLevel: maxLevel, unique: false)
+        nameIndex = StringSkipList<TableRow>(maxLevel: maxLevel, unique: false)
         ageIndex = SkipList<Int, TableRow>(maxLevel: maxLevel, unique: false)
         studentIDIndex = SkipList<String, TableRow>(maxLevel: maxLevel, unique: true)
     }
     init(size: Int) {
-        nameIndex = SkipList<String, TableRow>(maxNodes: size, unique: false)
+        nameIndex = StringSkipList<TableRow>(maxNodes: size, unique: false)
         ageIndex = SkipList<Int, TableRow>(maxNodes: size, unique: false)
         studentIDIndex = SkipList<String, TableRow>(maxNodes: size, unique: true)
     }

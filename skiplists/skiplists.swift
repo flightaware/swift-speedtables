@@ -34,10 +34,6 @@ struct SLNode<Key: Comparable, Value: Equatable> {
         self.level = (level > 0) ? level : SkipListRandomLevel(maxLevel)
         self.next = Array<UnsafeMutablePointer<SLNode<Key, Value>>?>(count: maxLevel, repeatedValue: nil)
     }
-    
-    func nextNode() -> SLNode<Key, Value>? {
-        return next[0] == nil ? nil : next[0]!.memory
-    }
 }
 
 func allocateSkipListNode<Key, Value>(key: Key?, value: Value? = nil, maxLevel: Int, level: Int = 0) -> UnsafeMutablePointer<SLNode<Key, Value>> {

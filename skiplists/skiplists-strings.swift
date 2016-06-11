@@ -1,8 +1,8 @@
 //
-//  skiplists.swift
+//  skiplists-strings.swift
 //  skiplists
 //
-//  Created by Peter da Silva on 5/25/16.
+//  Created by Peter da Silva on 6/11/16.
 //  Copyright © 2016 Flightaware. All rights reserved.
 //
 
@@ -19,10 +19,6 @@ struct SLStringNode<Value: Equatable> {
         self.level = (level > 0) ? level : SkipListRandomLevel(maxLevel)
         self.next = Array<UnsafeMutablePointer<SLStringNode<Value>>?>(count: maxLevel, repeatedValue: nil)
     }
-    
-    func nextNode() -> SLStringNode<Value>? {
-        return next[0] == nil ? nil : next[0]!.memory
-    }
 }
 
 func allocateSkipListStringNode<Value>(key: String?, value: Value? = nil, maxLevel: Int, level: Int = 0) -> UnsafeMutablePointer<SLStringNode<Value>> {
@@ -35,10 +31,6 @@ func freeSkipListStringNode<Value>(node: UnsafeMutablePointer<SLStringNode<Value
     node.destroy()
     free(node)
 }
-
-
-// Can't use a generic typealias here until Swift 3
-//typealias ErrorHandler<Key: Comparable> = (StringSkipListError) -> Void
 
 public class StringSkipList<Value: Equatable>: SequenceType {
     let head: UnsafeMutablePointer<SLStringNode<Value>>
@@ -58,18 +50,17 @@ public class StringSkipList<Value: Equatable>: SequenceType {
     public convenience init(maxNodes: Int, unique: Bool = false, errorHandler: ((StringSkipListError) -> Void)? = nil) {
         self.init(maxLevel: SkipListMaxLevel(maxNodes), unique: unique, errorHandler: errorHandler)
     }
-    
+
     deinit {
         // Walk the skiplist and release all the nodes, including head
         var x: UnsafeMutablePointer<SLStringNode<Value>>? = head
         while x != nil {
             let xnext = x!.memory.next[0]
-            x!.destroy()
-            free(x!)
+            freeSkipListStringNode(x!)
             x = xnext!
         }
     }
-    
+
     func search(greaterThanOrEqualTo key: String) -> UnsafeMutablePointer<SLStringNode<Value>>? {
         var x = head
         
@@ -90,7 +81,7 @@ public class StringSkipList<Value: Equatable>: SequenceType {
         
         return x
     }
-    
+
     public func search(greaterThanOrEqualTo key: String) -> [Value] {
         let x: UnsafeMutablePointer<SLStringNode<Value>>? = search(greaterThanOrEqualTo: key)
         if let array = x?.memory.values {
@@ -99,7 +90,7 @@ public class StringSkipList<Value: Equatable>: SequenceType {
             return []
         }
     }
-    
+
     func search(equalTo key: String) -> UnsafeMutablePointer<SLStringNode<Value>>? {
         let x: UnsafeMutablePointer<SLStringNode<Value>>? = search(greaterThanOrEqualTo: key)
 
@@ -110,12 +101,12 @@ public class StringSkipList<Value: Equatable>: SequenceType {
             return nil
         }
     }
-    
+
     public func exists(key: String) -> Bool {
         let x: UnsafeMutablePointer<SLStringNode<Value>>? = search(equalTo: key)
         return x != nil
     }
-    
+
     public func search(equalTo key: String) -> [Value] {
         let x: UnsafeMutablePointer<SLStringNode<Value>>? = search(equalTo: key)
         if let array = x?.memory.values {
@@ -124,7 +115,7 @@ public class StringSkipList<Value: Equatable>: SequenceType {
             return []
         }
     }
-    
+
     // Replace an entry in a skiplist - for optional keys
     public func replace(newKey: String?, inout keyStore: String?, value: Value) throws {
         // no change - no work
@@ -150,7 +141,7 @@ public class StringSkipList<Value: Equatable>: SequenceType {
             insert(k, value: value)
         }
     }
-    
+
     // Replace an entry in a skiplist - for non-optional keys
     public func replace(newKey: String, inout keyStore: String, value: Value) throws {
         // no change - no work
@@ -170,7 +161,7 @@ public class StringSkipList<Value: Equatable>: SequenceType {
         keyStore = newKey
         insert(keyStore, value: value)
     }
-        
+
     public func insert(key: String, value newValue: Value) {
         var update = Array<UnsafeMutablePointer<SLStringNode<Value>>?>(count: maxLevel, repeatedValue: nil)
         var x = head
@@ -221,7 +212,7 @@ public class StringSkipList<Value: Equatable>: SequenceType {
         }
         
         // make a new node and patch it in to the saved nodes in the update[] list
-        let newNode = allocateSkipListNode(key, value: newValue, maxLevel: maxLevel, level: level)
+        let newNode = allocateSkipListStringNode(key, value: newValue, maxLevel: maxLevel, level: level)
         i = 1
         while i <= level {
             newNode.memory.next[i-1] = update[i-1]!.memory.next[i-1]
@@ -229,7 +220,7 @@ public class StringSkipList<Value: Equatable>: SequenceType {
             i += 1
         }
     }
-    
+
     public func delete(key: String, value: Value) -> Bool {
         var update = Array<UnsafeMutablePointer<SLStringNode<Value>>?>(count: maxLevel, repeatedValue: nil)
         var x = head
@@ -291,11 +282,11 @@ public class StringSkipList<Value: Equatable>: SequenceType {
         }
         
         // Dispose of the node, because we're doing memory management
-        freeSkipListNode(x)
+        freeSkipListStringNode(x)
         
         return true
     }
-    
+
     public func generate() -> AnyGenerator<(String, Value)> {
         var row = head
         var index = -1
@@ -313,7 +304,7 @@ public class StringSkipList<Value: Equatable>: SequenceType {
             return (row.memory.key!, next)
         }
     }
-    
+
     func query(from start: String?, through end: String?) -> StringQuery<Value> {
         return query(min: start, max: end, minEqual: true, maxEqual: true)
     }
@@ -323,7 +314,7 @@ public class StringSkipList<Value: Equatable>: SequenceType {
     }
 
     func query(greaterThanOrEqual key: String?) -> StringQuery<Value> {
-        return query(min: string, minEqual: true)
+        return query(min: key, minEqual: true)
     }
     
     func query(greaterThan key: String?) -> StringQuery<Value> {
@@ -342,6 +333,7 @@ public class StringSkipList<Value: Equatable>: SequenceType {
         return StringQuery<Value>(list: self, min: min, max: max, minEqual: minEqual, maxEqual: maxEqual)
     }
 }
+
 
 // Skiplist errors
 public enum StringSkipListError: ErrorType {

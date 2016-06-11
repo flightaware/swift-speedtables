@@ -14,6 +14,7 @@
 		9BE496B31CF8ACC5002D643C /* speedtable-example.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BE496B21CF8ACC5002D643C /* speedtable-example.swift */; };
 		9BE496B51CFDC663002D643C /* queries.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BE496B41CFDC663002D643C /* queries.swift */; };
 		9BE496B71CFE29F0002D643C /* speedtables.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BE496B61CFE29F0002D643C /* speedtables.swift */; };
+		D069CB141D0CC974003C43BC /* skiplists.c in Sources */ = {isa = PBXBuildFile; fileRef = D069CB121D0CC974003C43BC /* skiplists.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -37,6 +38,9 @@
 		9BE496B21CF8ACC5002D643C /* speedtable-example.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "speedtable-example.swift"; sourceTree = "<group>"; };
 		9BE496B41CFDC663002D643C /* queries.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = queries.swift; sourceTree = "<group>"; };
 		9BE496B61CFE29F0002D643C /* speedtables.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = speedtables.swift; sourceTree = "<group>"; };
+		D069CB111D0CC974003C43BC /* skiplists-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "skiplists-Bridging-Header.h"; sourceTree = "<group>"; };
+		D069CB121D0CC974003C43BC /* skiplists.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = skiplists.c; sourceTree = "<group>"; };
+		D069CB131D0CC974003C43BC /* skiplists.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = skiplists.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -76,6 +80,9 @@
 				9BE496B21CF8ACC5002D643C /* speedtable-example.swift */,
 				9BE496B41CFDC663002D643C /* queries.swift */,
 				9BE496B61CFE29F0002D643C /* speedtables.swift */,
+				D069CB121D0CC974003C43BC /* skiplists.c */,
+				D069CB131D0CC974003C43BC /* skiplists.h */,
+				D069CB111D0CC974003C43BC /* skiplists-Bridging-Header.h */,
 			);
 			path = skiplists;
 			sourceTree = "<group>";
@@ -139,6 +146,7 @@
 			files = (
 				9BE496B31CF8ACC5002D643C /* speedtable-example.swift in Sources */,
 				9BA76A851D0C785400653CC9 /* skiplists-strings.swift in Sources */,
+				D069CB141D0CC974003C43BC /* skiplists.c in Sources */,
 				9B6BD1871D0C827F00C98905 /* queries-strings.swift in Sources */,
 				9BE496AF1CF63082002D643C /* skiplists.swift in Sources */,
 				9BE496B51CFDC663002D643C /* queries.swift in Sources */,
@@ -239,18 +247,24 @@
 		9BE496AC1CF63053002D643C /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CLANG_USE_OPTIMIZATION_PROFILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				"OTHER_SWIFT_FLAGS[arch=*]" = "-Ounchecked";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "skiplists/skiplists-Bridging-Header.h";
 			};
 			name = Debug;
 		};
 		9BE496AD1CF63053002D643C /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CLANG_USE_OPTIMIZATION_PROFILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				"OTHER_SWIFT_FLAGS[arch=*]" = "-Ounchecked";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "skiplists/skiplists-Bridging-Header.h";
 			};
 			name = Release;
 		};

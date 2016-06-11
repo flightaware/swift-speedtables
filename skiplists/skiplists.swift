@@ -34,21 +34,6 @@ class SLNode<Key: Comparable, Value: Equatable> {
         self.level = (level > 0) ? level : SkipListRandomLevel(maxLevel)
         self.next = Array<SLNode<Key, Value>?>(count: maxLevel, repeatedValue: nil)
     }
-    
-    func nextNode() -> SLNode<Key, Value>? {
-        return next[0]
-    }
-    
-    func dump(tag: String, verbose: Bool = false) {
-        print("\(tag) = Node(\(key) with \(values.count) values")
-        if(verbose) {
-            var i = 0
-            while i <= values.count {
-                print("    \(values[i])")
-                i += 1
-            }
-        }
-    }
 }
 
 // Can't use a generic typealias here until Swift 3
@@ -303,8 +288,8 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
         return AnyGenerator<(Key, Value)> {
             if index < 0 || index >= row.values.count {
                 repeat {
-                    guard row.nextNode() != nil else { return nil }
-                    row = row.nextNode()!
+                    guard row.next[0] != nil else { return nil }
+                    row = row.next[0]!
                 } while row.values.count == 0
                 index = 0
             }

@@ -39,11 +39,11 @@ public class Query<Key: Comparable, Value: Equatable>: SequenceType {
         var node: SLNode<Key, Value>?
 
         if min == nil {
-            node = list.head.nextNode()
+            node = list.head.next[0]
         } else {
             node = list.search(greaterThanOrEqualTo: min!)
             if node != nil && minEqual == false && node!.key == min {
-                node = node!.nextNode()
+                node = node!.next[0]
             }
         }
         return QueryState<Key, Value>(node: node)
@@ -57,7 +57,7 @@ public class Query<Key: Comparable, Value: Equatable>: SequenceType {
         
         // if we've stepped past the current node's values, keep stepping until we get a node with values
         while state.node != nil && state.index >= state.node!.values.count {
-            state.node = state.node!.nextNode()
+            state.node = state.node!.next[0]
             state.index = 0
         }
         

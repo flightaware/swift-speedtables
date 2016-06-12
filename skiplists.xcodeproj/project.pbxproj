@@ -248,7 +248,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
-				CLANG_USE_OPTIMIZATION_PROFILE = YES;
+				CLANG_USE_OPTIMIZATION_PROFILE = NO;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				"OTHER_SWIFT_FLAGS[arch=*]" = "-Ounchecked";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -260,7 +260,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
-				CLANG_USE_OPTIMIZATION_PROFILE = YES;
+				CLANG_USE_OPTIMIZATION_PROFILE = NO;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				"OTHER_SWIFT_FLAGS[arch=*]" = "-Ounchecked";
 				PRODUCT_NAME = "$(TARGET_NAME)";

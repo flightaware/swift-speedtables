@@ -20,7 +20,7 @@ int randomLevel(int maxLevels)
 }
 
 struct SLNode {
-    char *key;
+    char *keyString;
     int level;
     void *value;
     struct SLNode **next;
@@ -30,7 +30,7 @@ struct SLNode {
 struct SLNode *newSLNode(int maxLevels, int level)
 {
     struct SLNode *node = malloc(sizeof *node);
-    node->key = NULL;
+    node->keyString = NULL;
     node->value = NULL;
     node -> level = level;
     node->next = malloc(maxLevels * sizeof node);
@@ -44,17 +44,15 @@ struct SLNode *newSLNode(int maxLevels, int level)
 
 void destroySLNode(struct SLNode *node)
 {
-    if(node -> key) free(node->key);
+    if(node -> keyString) free(node->keyString);
     free(node->next);
     free(node);
 }
 
 struct SkipList {
     struct SLNode *head;
-    struct SLNode *update;
     int maxLevels;
     int level;
-    int search_ok;
     int type; // reserved
 };
 
@@ -67,10 +65,8 @@ struct SkipList *newSkipList(int maxLevels, int type)
 {
     struct SkipList *list = malloc(sizeof *list);
     list->head = newSLNode(maxLevels, 0);
-    list->update = newSLNode(maxLevels, 0);
     list->maxLevels = maxLevels;
     list->level = 1;
-    list->search_ok = 0;
     list->type = type;
     return list;
 }
@@ -82,81 +78,142 @@ void destroySkipList(struct SkipList *list)
         destroySLNode(list->head);
         list->head = next;
     }
-    destroySLNode(list->update);
     free(list);
 }
 
-int searchSkipList(struct SkipList *list, char *key)
+struct SkipListSearch {
+    struct SkipList *parent;
+    struct SLNode **update;
+    int ok;
+};
+
+struct SkipListSearch *newSkipListSearch(struct SkipList *parent)
+{
+    struct SkipListSearch *search = malloc(sizeof *search);
+    search->parent = parent;
+    search->update = malloc(parent->maxLevels * sizeof (struct SLNode));
+    search->ok = 0;
+    
+    int i;
+    for(i = 0; i < parent->maxLevels; i++)
+        search->update[i] = NULL;
+
+    return search;
+}
+
+void destroySkipListSearch(struct SkipListSearch *search)
+{
+    free(search->update);
+    free(search);
+}
+
+int searchSkipListString(struct SkipList *list, struct SkipListSearch *search, char *keyString)
 {
     struct SLNode *x = list->head;
     int i;
     
     for(i = list->level; i >= 1; i--) {
-        while(x->next[i-1] != NULL && strcmp(x->next[i-1]->key, key) < 0) {
+        while(x->next[i-1] != NULL && strcmp(x->next[i-1]->keyString, keyString) < 0) {
             x = x->next[i-1];
         }
-        list->update->next[i-1] = x;
+        search->update[i-1] = x;
         i -= 1;
     }
-    return list->search_ok = x->next[i-1] != NULL;
+    return search->ok = x->next[i-1] != NULL;
 }
 
-int searchMatchedExact(struct SkipList *list, char *key)
+int searchMatchedExactString(struct SkipListSearch *search, char *keyString)
 {
-    if(!list->search_ok) return 0;
-    if(list->update->next[0] == NULL) return 0;
-    return strcmp(list->update->next[0]->key, key) == 0;
+    if(!search->ok) return 0;
+    if(search->update[0] == NULL) return 0;
+
+    return strcmp(search->update[0]->keyString, keyString) == 0;
 }
 
-void *matchedValue(struct SkipList *list)
+char *getMatchedKeyString(struct SkipListSearch *search)
 {
-    if(!list->search_ok) return 0;
-    if(list->update->next[0] == NULL) return NULL;
-
-    return list->update->next[0]->value;
-}
-
-int insertBeforePossibleMatch(struct SkipList *list, char *key, void *value)
-{
-    if(!list->search_ok) return 0;
-    list->search_ok = 0;
+    if(!search->ok) return NULL;
+    if(search->update[0] == NULL) return NULL;
     
-    // Pick a random level for the new node
-    int level = randomLevel(list->maxLevels);
+    return search->update[0]->keyString;
+}
+
+void *getMatchedValue(struct SkipListSearch *search)
+{
+    if(!search->ok) return NULL;
+    if(search->update[0] == NULL) return NULL;
+
+    return search->update[0]->value;
+}
+
+int setMatchedValue(struct SkipListSearch *search, void *value)
+{
+    if(!search->ok) return 0;
+    if(search->update[0] == NULL) return 0;
+    
+    search->update[0]->value = value;
+    return 1;
+}
+
+// Generic insert for all types
+int insertBeforePossibleMatch(struct SkipListSearch *search, struct SLNode *newNode, int level)
+{
+    struct SkipList *list = search->parent;
+    if(!search->ok) return 0;
+    search->ok = 0;
     
     // If the new node is higher than the current level, fill up the update[] list
     // with head
     while(level > list->level) {
         list->level += 1;
-        list->update->next[list->level-1] = list->head;
+        search->update[list->level-1] = list->head;
     }
     
-    // make a new node and patch it in to the saved nodes in the update[] list
-    struct SLNode *newNode = newSLNode(list->maxLevels, level);
-    strcpy(newNode->key = malloc(strlen(key) + 1), key);
-    newNode -> value = value;
-    
+    // patch new node in to the saved nodes in the update[] list
     int i;
     for(i = 1; i <= level; i ++) {
-        newNode->next[i-1] = list->update->next[i-1]->next[i-1];
-        list->update->next[i-1]->next[i-1] = newNode;
+        newNode->next[i-1] = search->update[i-1]->next[i-1];
+        search->update[i-1]->next[i-1] = newNode;
     }
     return 1;
 }
 
-int deleteMatchedNode(struct SkipList *list)
+// Specific insert for string
+int insertBeforePossibleMatchString(struct SkipListSearch *search, char *keyString, void *value)
 {
-    if(!list->search_ok) return 0;
-    list->search_ok = 0;
+    struct SkipList *list = search->parent;
+    if(!search->ok) return 0;
+
+    // Pick a random level for the new node
+    int level = randomLevel(list->maxLevels);
+
+    // Create the new node
+    struct SLNode *newNode = newSLNode(list->maxLevels, level);
+    strcpy(newNode->keyString = malloc(strlen(keyString) + 1), keyString);
+    newNode -> value = value;
     
-    struct SLNode *x = list->update->next[0];
+    // Call the general routine for the tricky stuff
+    if (!insertBeforePossibleMatch(search, newNode, level)) { // can't happen
+        destroySLNode(newNode);
+        return 0;
+    }
+    return 1;
+}
+
+int deleteMatchedNode(struct SkipListSearch *search)
+{
+    struct SkipList *list = search->parent;
+    if(!search->ok) return 0;
+    search->ok = 0;
+    
+    struct SLNode *x = search->update[0];
     
     // point all the previous node to the new next node
     int i;
     for(i = 1; i < list->level; i ++) {
-        if(list->update->next[i-1]->next[i-1] != x)
+        if(search->update[i-1]->next[i-1] != x)
             break;
-        list->update->next[i-1]->next[i-1] = x->next[i-1];
+        search->update[i-1]->next[i-1] = x->next[i-1];
     }
     
     // if that was the biggest node, and we can see the end of the list from the head,

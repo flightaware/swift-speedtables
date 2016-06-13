@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		9B6BD1871D0C827F00C98905 /* queries-strings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B6BD1861D0C827F00C98905 /* queries-strings.swift */; };
+		9B6BD1891D0EEE5200C98905 /* cskiplists.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B6BD1881D0EEE5200C98905 /* cskiplists.swift */; };
 		9BA76A851D0C785400653CC9 /* skiplists-strings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BA76A841D0C785400653CC9 /* skiplists-strings.swift */; };
 		9BE496A81CF63053002D643C /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BE496A71CF63053002D643C /* main.swift */; };
 		9BE496AF1CF63082002D643C /* skiplists.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BE496AE1CF63082002D643C /* skiplists.swift */; };
@@ -31,6 +32,7 @@
 
 /* Begin PBXFileReference section */
 		9B6BD1861D0C827F00C98905 /* queries-strings.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "queries-strings.swift"; sourceTree = "<group>"; };
+		9B6BD1881D0EEE5200C98905 /* cskiplists.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = cskiplists.swift; sourceTree = "<group>"; };
 		9BA76A841D0C785400653CC9 /* skiplists-strings.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "skiplists-strings.swift"; sourceTree = "<group>"; };
 		9BE496A41CF63053002D643C /* skiplists */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = skiplists; sourceTree = BUILT_PRODUCTS_DIR; };
 		9BE496A71CF63053002D643C /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
@@ -83,6 +85,7 @@
 				D069CB121D0CC974003C43BC /* skiplists.c */,
 				D069CB131D0CC974003C43BC /* skiplists.h */,
 				D069CB111D0CC974003C43BC /* skiplists-Bridging-Header.h */,
+				9B6BD1881D0EEE5200C98905 /* cskiplists.swift */,
 			);
 			path = skiplists;
 			sourceTree = "<group>";
@@ -152,6 +155,7 @@
 				9BE496B51CFDC663002D643C /* queries.swift in Sources */,
 				9BE496B71CFE29F0002D643C /* speedtables.swift in Sources */,
 				9BE496A81CF63053002D643C /* main.swift in Sources */,
+				9B6BD1891D0EEE5200C98905 /* cskiplists.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

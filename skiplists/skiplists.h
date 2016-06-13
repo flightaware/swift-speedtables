@@ -13,15 +13,15 @@
 #include <stdlib.h>
 #include <string.h>
 
-struct CSkipListNode {
+struct C_SkipListNode {
     char *keyString;
     int level;
     void *value;
-    struct CSkipListNode **next;
+    struct C_SkipListNode **next;
 };
 
-struct CSkipList {
-    struct CSkipListNode *head;
+struct C_SkipList {
+    struct C_SkipListNode *head;
     int maxLevels;
     int level;
     int type; // reserved
@@ -32,10 +32,10 @@ struct CSkipList {
 #define SKIPLIST_INT 2
 #define SKIPLIST_DOUBLE 3
 
-struct CSkipListSearch {
-    struct CSkipList *parent;
-    struct CSkipListNode **update;
-    struct CSkipListNode *node;
+struct C_SkipListSearch {
+    struct C_SkipList *parent;
+    struct C_SkipListNode **update;
+    struct C_SkipListNode *node;
     int state;
 };
 
@@ -44,16 +44,18 @@ struct CSkipListSearch {
 #define SEARCH_STATE_TRAVERSE 2     // Search is complete, and no key was found
 #define SEARCH_STATE_NOT_FOUND 3    // Search is currently traversing the list
 
-struct CSkipList *newCSkipList(int maxLevels, int type);
-void destroySkipList(struct CSkipList *list);
-int searchSkipList(struct CSkipList *list, char *key);
-int searchMatchedExactString(struct CSkipListSearch *search, char *keyString);
-int insertBeforePossibleMatchString(struct CSkipListSearch *search, char *keyString, void *value);
-int deleteMatchedNode(struct CSkipListSearch *search);
-char *getMatchedKeyString(struct CSkipListSearch *search);
-void *getMatchedValue(struct CSkipListSearch *search);
-int setMatchedValue(struct CSkipListSearch *search, void *value);
-int advanceSearchNode(struct CSkipListSearch *search);
-
+struct C_SkipList *newSkipList(int maxLevels, int type);
+void destroySkipList(struct C_SkipList *list);
+int searchSkipListString(struct C_SkipListSearch *search, const char *key);
+int searchMatchedExactString(struct C_SkipListSearch *search, const char *keyString);
+int insertBeforePossibleMatchString(struct C_SkipListSearch *search, const char *keyString, void *value);
+int deleteMatchedNode(struct C_SkipListSearch *search);
+char *getMatchedKeyString(struct C_SkipListSearch *search);
+void *getMatchedValue(struct C_SkipListSearch *search);
+int setMatchedValue(struct C_SkipListSearch *search, void *value);
+int advanceSearchNode(struct C_SkipListSearch *search);
+void destroySkipListSearch(struct C_SkipListSearch *search);
+struct C_SkipListSearch *newSkipListSearch(struct C_SkipList *parent);
+int searchCanInsert(struct C_SkipListSearch *search);
 
 #endif /* skiplists_h */

@@ -20,9 +20,9 @@ int randomLevel(int maxLevels)
 }
 
 // maxlevels is the max depth of this skiplist
-struct CSkipListNode *newSkipListNode(int maxLevels, int level)
+struct C_SkipListNode *newSkipListNode(int maxLevels, int level)
 {
-    struct CSkipListNode *node = malloc(sizeof *node);
+    struct C_SkipListNode *node = malloc(sizeof *node);
     node->keyString = NULL;
     node->value = NULL;
     node -> level = level;
@@ -35,16 +35,18 @@ struct CSkipListNode *newSkipListNode(int maxLevels, int level)
     return node;
 }
 
-void destroySkipListNode(struct CSkipListNode *node)
+void destroySkipListNode(struct C_SkipListNode *node)
 {
-    if(node -> keyString) free(node->keyString);
-    free(node->next);
-    free(node);
+    if(node) {
+        if(node -> keyString) free(node->keyString);
+        free(node->next);
+        free(node);
+    }
 }
 
-struct CSkipList *newSkipList(int maxLevels, int type)
+struct C_SkipList *newSkipList(int maxLevels, int type)
 {
-    struct CSkipList *list = malloc(sizeof *list);
+    struct C_SkipList *list = malloc(sizeof *list);
     list->head = newSkipListNode(maxLevels, 0);
     list->maxLevels = maxLevels;
     list->level = 1;
@@ -52,22 +54,26 @@ struct CSkipList *newSkipList(int maxLevels, int type)
     return list;
 }
 
-void destroySkipList(struct CSkipList *list)
+void destroySkipList(struct C_SkipList *list)
 {
-    while(list->head) {
-        struct CSkipListNode *next = list->head->next[0];
-        destroySkipListNode(list->head);
-        list->head = next;
+    if(list) {
+        while(list->head) {
+            struct C_SkipListNode *next = list->head->next[0];
+            destroySkipListNode(list->head);
+            list->head = next;
+        }
+        free(list);
     }
-    free(list);
 }
 
 
-struct CSkipListSearch *newSkipListSearch(struct CSkipList *parent)
+struct C_SkipListSearch *newSkipListSearch(struct C_SkipList *parent)
 {
-    struct CSkipListSearch *search = malloc(sizeof *search);
+    struct C_SkipListSearch *search = malloc(sizeof *search);
+    if(!search) return NULL;
+    search->update = malloc(parent->maxLevels * sizeof (struct C_SkipListNode));
+    if(!search->update) { free(search); return NULL; }
     search->parent = parent;
-    search->update = malloc(parent->maxLevels * sizeof (struct CSkipListNode));
     search->node = NULL;
     search->state = SEARCH_STATE_NONE;
     
@@ -78,15 +84,18 @@ struct CSkipListSearch *newSkipListSearch(struct CSkipList *parent)
     return search;
 }
 
-void destroySkipListSearch(struct CSkipListSearch *search)
+void destroySkipListSearch(struct C_SkipListSearch *search)
 {
-    free(search->update);
-    free(search);
+    if(search) {
+        free(search->update);
+        free(search);
+    }
 }
 
-int searchSkipListString(struct CSkipList *list, struct CSkipListSearch *search, char *keyString)
+int searchSkipListString(struct C_SkipListSearch *search, const char *keyString)
 {
-    struct CSkipListNode *x = list->head;
+    struct C_SkipList *list = search->parent;
+    struct C_SkipListNode *x = list->head;
     int i;
     
     for(i = list->level; i >= 1; i--) {
@@ -105,7 +114,7 @@ int searchSkipListString(struct CSkipList *list, struct CSkipListSearch *search,
     return search->state = SEARCH_STATE_FOUND;
 }
 
-int searchMatchedExactString(struct CSkipListSearch *search, char *keyString)
+int searchMatchedExactString(struct C_SkipListSearch *search, const char *keyString)
 {
     if(search->state != SEARCH_STATE_FOUND) return 0;
     if(search->node == NULL) return 0;
@@ -113,7 +122,7 @@ int searchMatchedExactString(struct CSkipListSearch *search, char *keyString)
     return strcmp(search->node->keyString, keyString) == 0;
 }
 
-char *getMatchedKeyString(struct CSkipListSearch *search)
+char *getMatchedKeyString(struct C_SkipListSearch *search)
 {
     if(search->state != SEARCH_STATE_FOUND && search->state != SEARCH_STATE_TRAVERSE) return NULL;
     if(search->node == NULL) return NULL;
@@ -121,7 +130,7 @@ char *getMatchedKeyString(struct CSkipListSearch *search)
     return search->node->keyString;
 }
 
-void *getMatchedValue(struct CSkipListSearch *search)
+void *getMatchedValue(struct C_SkipListSearch *search)
 {
     if(search->state != SEARCH_STATE_FOUND && search->state != SEARCH_STATE_TRAVERSE) return NULL;
     if(search->node == NULL) return NULL;
@@ -129,7 +138,7 @@ void *getMatchedValue(struct CSkipListSearch *search)
     return search->node->value;
 }
 
-int setMatchedValue(struct CSkipListSearch *search, void *value)
+int setMatchedValue(struct C_SkipListSearch *search, void *value)
 {
     if(search->state != SEARCH_STATE_FOUND) return 0;
     if(search->node == NULL) return 0;
@@ -138,7 +147,7 @@ int setMatchedValue(struct CSkipListSearch *search, void *value)
     return 1;
 }
 
-int advanceSearchNode(struct CSkipListSearch *search)
+int advanceSearchNode(struct C_SkipListSearch *search)
 {
     if(search->state != SEARCH_STATE_FOUND && search->state != SEARCH_STATE_TRAVERSE) return 0;
     if(search->node == NULL) return 0;
@@ -153,9 +162,9 @@ int advanceSearchNode(struct CSkipListSearch *search)
 }
 
 // Generic insert for all types
-int insertBeforePossibleMatch(struct CSkipListSearch *search, struct CSkipListNode *newNode, int level)
+int insertBeforePossibleMatch(struct C_SkipListSearch *search, struct C_SkipListNode *newNode, int level)
 {
-    struct CSkipList *list = search->parent;
+    struct C_SkipList *list = search->parent;
     if(search->state != SEARCH_STATE_FOUND && search->state != SEARCH_STATE_NOT_FOUND) return 0;
     search->state = SEARCH_STATE_NONE;
     search->node = NULL;
@@ -176,17 +185,22 @@ int insertBeforePossibleMatch(struct CSkipListSearch *search, struct CSkipListNo
     return 1;
 }
 
-// Specific insert for string
-int insertBeforePossibleMatchString(struct CSkipListSearch *search, char *keyString, void *value)
+int searchCanInsert(struct C_SkipListSearch *search)
 {
-    struct CSkipList *list = search->parent;
+    return search->state == SEARCH_STATE_FOUND || search->state == SEARCH_STATE_NOT_FOUND;
+}
+
+// Specific insert for string
+int insertBeforePossibleMatchString(struct C_SkipListSearch *search, const char *keyString, void *value)
+{
+    struct C_SkipList *list = search->parent;
     if(search->state != SEARCH_STATE_FOUND && search->state != SEARCH_STATE_NOT_FOUND) return 0;
 
     // Pick a random level for the new node
     int level = randomLevel(list->maxLevels);
 
     // Create the new node
-    struct CSkipListNode *newNode = newSkipListNode(list->maxLevels, level);
+    struct C_SkipListNode *newNode = newSkipListNode(list->maxLevels, level);
     strcpy(newNode->keyString = malloc(strlen(keyString) + 1), keyString);
     newNode -> value = value;
     
@@ -198,14 +212,14 @@ int insertBeforePossibleMatchString(struct CSkipListSearch *search, char *keyStr
     return 1;
 }
 
-int deleteMatchedNode(struct CSkipListSearch *search)
+int deleteMatchedNode(struct C_SkipListSearch *search)
 {
-    struct CSkipList *list = search->parent;
+    struct C_SkipList *list = search->parent;
     if(search->state != SEARCH_STATE_FOUND) return 0;
     search->state = SEARCH_STATE_NONE;
     search->node = NULL;
     
-    struct CSkipListNode *x = search->update[0];
+    struct C_SkipListNode *x = search->update[0];
     
     // point all the previous node to the new next node
     int i;

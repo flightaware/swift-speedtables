@@ -50,12 +50,13 @@ int searchSkipListString(struct C_SkipListSearch *search, const char *key);
 int searchMatchedExactString(struct C_SkipListSearch *search, const char *keyString);
 int insertBeforePossibleMatchString(struct C_SkipListSearch *search, const char *keyString, void *value);
 int deleteMatchedNode(struct C_SkipListSearch *search);
-char *getMatchedKeyString(struct C_SkipListSearch *search);
+const char *getMatchedKeyString(struct C_SkipListSearch *search);
 void *getMatchedValue(struct C_SkipListSearch *search);
 int setMatchedValue(struct C_SkipListSearch *search, void *value);
 int advanceSearchNode(struct C_SkipListSearch *search);
 void destroySkipListSearch(struct C_SkipListSearch *search);
 struct C_SkipListSearch *newSkipListSearch(struct C_SkipList *parent);
 int searchCanInsert(struct C_SkipListSearch *search);
+void traverseSkipList(struct C_SkipListSearch *search);
 
 #endif /* skiplists_h */

@@ -19,6 +19,12 @@ class SkipListValue<Value> {
     }
 }
 
+enum GenState {
+    case New
+    case Traversing
+    case Done
+}
+
 public class CSkipList<Value: Equatable>: SequenceType {
     var list: UnsafeMutablePointer<C_SkipList>
     let unique: Bool
@@ -103,5 +109,50 @@ public class CSkipList<Value: Equatable>: SequenceType {
         let v = SkipListValue(v: [newValue])
         
         return insertBeforePossibleMatchString(s, key, UnsafeMutablePointer(Unmanaged.passRetained(v).toOpaque())) != 0
+    }
+    
+    public func generate() -> AnyGenerator<(String, Value)> {
+        let s = newSkipListSearch(list);
+        var state: GenState = .New
+        var v: SkipListValue<Value>? = nil;
+        var i = -1;
+        var k: String? = nil
+        
+        return AnyGenerator<(String, Value)> {
+            if state == .New {
+                if s == nil {
+                    return nil
+                }
+                traverseSkipList(s)
+                state = .Traversing
+            }
+            while state == .Traversing {
+                if v != nil {
+                    i += 1
+                    if v!.a.count > i {
+                        return (k!, v!.a[i])
+                    }
+                    v = nil
+                    i = -1
+                    advanceSearchNode(s)
+                }
+
+                let kp = getMatchedKeyString(s)
+                if kp == nil {
+                    state = .Done
+                    return nil
+                }
+                k = NSString(UTF8String: kp)! as String
+                
+                let p = getMatchedValue(s)
+                if p == nil {
+                    state = .Done
+                    return nil
+                }
+                let tmp: SkipListValue<Value> = Unmanaged.fromOpaque(COpaquePointer(p)).takeUnretainedValue()
+                v = tmp
+            }
+            return nil
+        }
     }
 }

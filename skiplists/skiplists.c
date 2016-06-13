@@ -92,6 +92,17 @@ void destroySkipListSearch(struct C_SkipListSearch *search)
     }
 }
 
+// Shortcut search set up to traverse the whole list
+void traverseSkipList(struct C_SkipListSearch *search)
+{
+    if(search->parent->head) {
+        search->node = search->parent->head->next[0];
+    } else {
+        search->node = NULL;
+    }
+    search->state = search->node ? SEARCH_STATE_TRAVERSE : SEARCH_STATE_NONE;
+}
+
 int searchSkipListString(struct C_SkipListSearch *search, const char *keyString)
 {
     struct C_SkipList *list = search->parent;
@@ -122,7 +133,7 @@ int searchMatchedExactString(struct C_SkipListSearch *search, const char *keyStr
     return strcmp(search->node->keyString, keyString) == 0;
 }
 
-char *getMatchedKeyString(struct C_SkipListSearch *search)
+const char *getMatchedKeyString(struct C_SkipListSearch *search)
 {
     if(search->state != SEARCH_STATE_FOUND && search->state != SEARCH_STATE_TRAVERSE) return NULL;
     if(search->node == NULL) return NULL;

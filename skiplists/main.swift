@@ -243,3 +243,23 @@ func forspeedtables() -> Int {
 let speedtables = forspeedtables()
 print("Speedtables delta: \(speedtables - overhead)µs, \(((speedtables - overhead) / overhead) * 100)%")
 
+let c = CSkipList<String>(maxLevel: 20)
+func forCskiplists() -> Int {
+    let t0 = clock()
+    var tLast = t0 - t0
+    for i in 1...1000000 {
+        let name = randomString(6)
+        if i % 100000 == 0 {
+            let tNext = clock() - t0
+            print("Inserting \(name), \(i) at \(Int(tNext) - Int(tLast))µs")
+            tLast = tNext
+        }
+        c.insert(name, value: String(i))
+    }
+    let tFinal = clock() - t0
+    print("Total for skiplists \(tFinal)µs")
+    return Int(tFinal)
+}
+let cskiplists = forCskiplists()
+print("CSkipLists delta: \(cskiplists - overhead)µs, \(((cskiplists - overhead) / overhead) * 100)%")
+

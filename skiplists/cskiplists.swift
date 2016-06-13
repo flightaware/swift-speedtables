@@ -28,7 +28,7 @@ enum GenState {
 public class CSkipList<Value: Equatable>: SequenceType {
     var list: UnsafeMutablePointer<C_SkipList>
     let unique: Bool
-    init(maxLevel: Int, unique: Bool, type: Int) {
+    init(maxLevel: Int, unique: Bool = false, type: Int = Int(SKIPLIST_STRING)) {
         self.list = newSkipList(Int32(maxLevel), Int32(type))
         self.unique = unique
     }

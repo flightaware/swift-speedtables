@@ -84,15 +84,22 @@ void destroySkipList(struct SkipList *list)
 struct SkipListSearch {
     struct SkipList *parent;
     struct SLNode **update;
-    int ok;
+    struct SLNode *node;
+    int state;
 };
+
+#define SEARCH_STATE_NONE 0         // Not a valid search, either new or an insert/delete operation has occurred
+#define SEARCH_STATE_FOUND 1        // Search is complete, and a key (may not be exact match) was found
+#define SEARCH_STATE_TRAVERSE 2     // Search is complete, and no key was found
+#define SEARCH_STATE_NOT_FOUND 3    // Search is currently traversing the list
 
 struct SkipListSearch *newSkipListSearch(struct SkipList *parent)
 {
     struct SkipListSearch *search = malloc(sizeof *search);
     search->parent = parent;
     search->update = malloc(parent->maxLevels * sizeof (struct SLNode));
-    search->ok = 0;
+    search->node = NULL;
+    search->state = SEARCH_STATE_NONE;
     
     int i;
     for(i = 0; i < parent->maxLevels; i++)
@@ -119,48 +126,69 @@ int searchSkipListString(struct SkipList *list, struct SkipListSearch *search, c
         search->update[i-1] = x;
         i -= 1;
     }
-    return search->ok = x->next[i-1] != NULL;
+    if (x->next[i-1] == NULL) {
+        search->state = SEARCH_STATE_NOT_FOUND;
+    } else {
+        search->state = SEARCH_STATE_FOUND;
+        search->node = search->update[0];
+    }
+    return search->state = SEARCH_STATE_FOUND;
 }
 
 int searchMatchedExactString(struct SkipListSearch *search, char *keyString)
 {
-    if(!search->ok) return 0;
-    if(search->update[0] == NULL) return 0;
+    if(search->state != SEARCH_STATE_FOUND) return 0;
+    if(search->node == NULL) return 0;
 
-    return strcmp(search->update[0]->keyString, keyString) == 0;
+    return strcmp(search->node->keyString, keyString) == 0;
 }
 
 char *getMatchedKeyString(struct SkipListSearch *search)
 {
-    if(!search->ok) return NULL;
-    if(search->update[0] == NULL) return NULL;
+    if(search->state != SEARCH_STATE_FOUND && search->state != SEARCH_STATE_TRAVERSE) return NULL;
+    if(search->node == NULL) return NULL;
     
-    return search->update[0]->keyString;
+    return search->node->keyString;
 }
 
 void *getMatchedValue(struct SkipListSearch *search)
 {
-    if(!search->ok) return NULL;
-    if(search->update[0] == NULL) return NULL;
+    if(search->state != SEARCH_STATE_FOUND && search->state != SEARCH_STATE_TRAVERSE) return NULL;
+    if(search->node == NULL) return NULL;
 
-    return search->update[0]->value;
+    return search->node->value;
 }
 
 int setMatchedValue(struct SkipListSearch *search, void *value)
 {
-    if(!search->ok) return 0;
-    if(search->update[0] == NULL) return 0;
+    if(search->state != SEARCH_STATE_FOUND) return 0;
+    if(search->node == NULL) return 0;
     
-    search->update[0]->value = value;
+    search->node->value = value;
     return 1;
+}
+
+int advanceSearchNode(struct SkipListSearch *search)
+{
+    if(search->state != SEARCH_STATE_FOUND && search->state != SEARCH_STATE_TRAVERSE) return 0;
+    if(search->node == NULL) return 0;
+    search->node = search->node->next[0];
+    if(search->node == NULL) {
+        search->state = SEARCH_STATE_NONE;
+        return 0;
+    } else {
+        search->state = SEARCH_STATE_TRAVERSE;
+        return 1;
+    }
 }
 
 // Generic insert for all types
 int insertBeforePossibleMatch(struct SkipListSearch *search, struct SLNode *newNode, int level)
 {
     struct SkipList *list = search->parent;
-    if(!search->ok) return 0;
-    search->ok = 0;
+    if(search->state != SEARCH_STATE_FOUND && search->state != SEARCH_STATE_NOT_FOUND) return 0;
+    search->state = SEARCH_STATE_NONE;
+    search->node = NULL;
     
     // If the new node is higher than the current level, fill up the update[] list
     // with head
@@ -182,7 +210,7 @@ int insertBeforePossibleMatch(struct SkipListSearch *search, struct SLNode *newN
 int insertBeforePossibleMatchString(struct SkipListSearch *search, char *keyString, void *value)
 {
     struct SkipList *list = search->parent;
-    if(!search->ok) return 0;
+    if(search->state != SEARCH_STATE_FOUND && search->state != SEARCH_STATE_NOT_FOUND) return 0;
 
     // Pick a random level for the new node
     int level = randomLevel(list->maxLevels);
@@ -203,8 +231,9 @@ int insertBeforePossibleMatchString(struct SkipListSearch *search, char *keyStri
 int deleteMatchedNode(struct SkipListSearch *search)
 {
     struct SkipList *list = search->parent;
-    if(!search->ok) return 0;
-    search->ok = 0;
+    if(search->state != SEARCH_STATE_FOUND) return 0;
+    search->state = SEARCH_STATE_NONE;
+    search->node = NULL;
     
     struct SLNode *x = search->update[0];
     

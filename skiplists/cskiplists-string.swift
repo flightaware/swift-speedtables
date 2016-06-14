@@ -89,6 +89,7 @@ public final class CSkipList: SequenceType {
     }
     
     public func search(equalTo key: String) -> ContiguousArray<String> {
+
         let s: UnsafeMutablePointer<C_SkipListSearch> = search(equalTo: key)
         guard s != nil else { return [] }
         defer { destroySkipListSearch(s); }

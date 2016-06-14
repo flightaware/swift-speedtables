@@ -245,11 +245,40 @@ print("Speedtables delta: \(speedtables - overhead)µs, \(((speedtables - overhe
 
 let c = CSkipList(maxLevel: 20)
 
-c.insert("Hello", value: "How do you do?")
-for (k, v) in c {
-    print("c['\(k)'] = \(v)")
+print("\nPopulating list.")
+c.insert("hello", value: "I say hello")
+c.insert("goodbye", value: "You say goodbye")
+c.insert("yes", value: "I say yes")
+c.insert("no", value: "You say no")
+c.insert("high", value: "I say high")
+c.insert("low", value: "you say low")
+c.insert("stop", value: "You say stop")
+c.insert("go", value: "I say go go go")
+c.insert("hello", value: "Hello my baby")
+c.insert("hello", value: "Hello my honey")
+c.insert("hello", value: "Hello my ragtime gal")
+c.insert("goodbye", value: "Goodnight America, and all the ships at sea")
+print("Dumping list:")
+for (key, value) in c {
+    print("    \(key): \(value)")
 }
-c.delete("Hello", value: "How do you do?")
+
+func cdelete_all(c: CSkipList, key: String) {
+    for val in c.search(equalTo: key) {
+        print("Deleting \((key, val))")
+        c.delete(key, value: val)
+    }
+}
+
+print("Delete test")
+cdelete_all(c, key: "high")
+cdelete_all(c, key: "low")
+cdelete_all(c, key: "goodbye")
+
+print("Dumping list:")
+for (key, value) in c {
+    print("\(key): \(value)")
+}
 
 func forCskiplists() -> Int {
     let t0 = clock()
@@ -269,3 +298,5 @@ func forCskiplists() -> Int {
 }
 let cskiplists = forCskiplists()
 print("CSkipLists delta: \(cskiplists - overhead)µs, \(((cskiplists - overhead) / overhead) * 100)%")
+
+

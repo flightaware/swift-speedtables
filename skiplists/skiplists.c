@@ -164,22 +164,28 @@ int searchSkipListString(struct C_SkipListSearch *search, const char *keyString)
     // dumpSearch(search, "before search");
     for(i = list->level; i >= 1; i--) {
         while(x->next[i-1] != NULL) {
-            if(x->next[i-1]->keyString[0] >= keyString[0] && strcmp(x->next[i-1]->keyString, keyString) >= 0) {
+            if(keyString[0] < x->next[i-1]->keyString[0]) {
                 break;
+            } else if(keyString[0] == x->next[i-1]->keyString[0]) {
+                if(strcmp(keyString, x->next[i-1]->keyString) <= 0) {
+                    break;
+                }
             }
             x = x->next[i-1];
         }
         search->update[i-1] = x;
     }
+
     // dumpSearch(search, "after search");
     // dumpNode(x, "x"); fprintf(stderr, ";\n");
-    if (x->next[i-1] == NULL) {
+    if (x->next[0] == NULL) {
         search->state = SEARCH_STATE_NOT_FOUND;
     } else {
         search->state = SEARCH_STATE_FOUND;
-        search->node = search->update[0];
+        search->node = x->next[0];
     }
-    return search->state = SEARCH_STATE_FOUND;
+
+    return search->state == SEARCH_STATE_FOUND;
 }
 
 int searchMatchedExactString(struct C_SkipListSearch *search, const char *keyString)
@@ -295,13 +301,12 @@ int deleteMatchedNode(struct C_SkipListSearch *search)
     struct C_SkipList *list = search->parent;
     if(search->state != SEARCH_STATE_FOUND) return 0;
     search->state = SEARCH_STATE_NONE;
+    struct C_SkipListNode *x = search->node;
     search->node = NULL;
-    
-    struct C_SkipListNode *x = search->update[0];
-    
+
     // point all the previous node to the new next node
     int i;
-    for(i = 1; i < list->level; i ++) {
+    for(i = 1; i <= list->level; i++) {
         if(search->update[i-1]->next[i-1] != x)
             break;
         search->update[i-1]->next[i-1] = x->next[i-1];

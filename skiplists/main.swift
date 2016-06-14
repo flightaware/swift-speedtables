@@ -244,6 +244,13 @@ func forspeedtables() -> Int {
 //print("Speedtables delta: \(speedtables - overhead)µs, \(((speedtables - overhead) / overhead) * 100)%")
 
 let c = CSkipList<String>(maxLevel: 20)
+
+c.insert("Hello", value: "How do you do?")
+for (k, v) in c {
+    print("c['\(k)'] = \(v)")
+}
+c.delete("Hello", value: "How do you do?")
+
 func forCskiplists() -> Int {
     let t0 = clock()
     var tLast = t0 - t0

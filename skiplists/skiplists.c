@@ -119,7 +119,7 @@ void destroySkipList(struct C_SkipList *list)
 struct C_SkipListSearch *newSkipListSearch(struct C_SkipList *parent)
 {
     struct C_SkipListSearch *search = malloc(sizeof *search);
-    if(!search) {
+    if(search) {
         search->update = malloc(parent->maxLevels * sizeof (struct C_SkipListNode));
         if(!search->update) {
             free(search);

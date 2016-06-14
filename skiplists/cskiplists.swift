@@ -128,6 +128,39 @@ public class CSkipList<Value: Equatable>: SequenceType {
         return insertBeforePossibleMatchString(s, key, UnsafeMutablePointer(Unmanaged.passRetained(v).toOpaque())) != 0
     }
     
+    public func delete(key: String, value: Value) -> Bool {
+        let s = newSkipListSearch(list);
+        guard s != nil else { return false }
+        defer { destroySkipListSearch(s); }
+        
+        // Look for the key, exit if no match
+        if searchSkipListString(s, key) == 0 { return false }
+        
+        if searchMatchedExactString(s, key) == 0 { return false }
+        
+        let p = getMatchedValue(s)
+        if p != nil {
+            let v: SkipListValue<Value> = Unmanaged.fromOpaque(COpaquePointer(p)).takeUnretainedValue();
+            if let i = v.a.indexOf(value) {
+                v.a.removeAtIndex(i)
+                if v.a.count > 0 {
+                    return true
+                }
+            } else {
+                return false
+            }
+        }
+        
+        // release any swift-level data in the matched node
+        deleteMatchedValues(s);
+        
+        // call c for the heavy lisfting - remove the matched node from the list and free it
+        deleteMatchedNode(s);
+        
+        // p == nil is a "can't happen", but if it did that means we didn't find a match.
+        return p != nil;
+    }
+    
     public func generate() -> AnyGenerator<(String, Value)> {
         let s = newSkipListSearch(list);
         var state: GenState = .New

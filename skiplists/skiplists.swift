@@ -12,7 +12,7 @@ let randomProbability = 0.5
 
 func SkipListRandomLevel(maxLevel: Int) -> Int {
     var newLevel = 1
-    while drand48() < randomProbability && newLevel < maxLevel {
+    while drand48() < randomProbability && newLevel < maxLevel-1 {
         newLevel += 1
     }
     return newLevel

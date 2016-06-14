@@ -240,8 +240,8 @@ func forspeedtables() -> Int {
     print("Total for speedtables \(tFinal)µs")
     return Int(tFinal)
 }
-let speedtables = forspeedtables()
-print("Speedtables delta: \(speedtables - overhead)µs, \(((speedtables - overhead) / overhead) * 100)%")
+//let speedtables = forspeedtables()
+//print("Speedtables delta: \(speedtables - overhead)µs, \(((speedtables - overhead) / overhead) * 100)%")
 
 let c = CSkipList<String>(maxLevel: 20)
 func forCskiplists() -> Int {

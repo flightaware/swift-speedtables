@@ -8,12 +8,49 @@
 
 #include "skiplists.h"
 
+// DEBUGGER
+void dumpNode(struct C_SkipListNode *node, char *name)
+{
+    if(name) fprintf(stderr, "name = %s ", name);
+    if(!node) {
+        fprintf(stderr, "NULL");
+        return;
+    }
+    fprintf(stderr, "%lx", (long)node);
+    if(node->keyString) fprintf(stderr, " '%s'", node->keyString);
+    fprintf(stderr, " level=%d", node->level);
+}
+
+void dumpList(struct C_SkipList *list, char *name)
+{
+    if(name) fprintf(stderr, "%s: ", name);
+    if(!list) {
+        fprintf(stderr, "NULL");
+        return;
+    }
+    dumpNode(list->head, "[head");
+    fprintf(stderr, "]; maxLevels = %d; level = %d; type = %d;\n", list->maxLevels, list->level, list->type);
+}
+
+void dumpSearch(struct C_SkipListSearch *search, char *name)
+{
+    int i;
+    if(name) fprintf(stderr, "SEARCH %s:\n", name);
+    dumpList(search->parent, "parent");
+    for(i = 0; i < search->parent->maxLevels; i++) {
+        fprintf(stderr, "update[%d] = ", i);
+        dumpNode(search->update[i], NULL);
+        fprintf(stderr, ";\n");
+    }
+}
+
+
 double randomProbability = 0.5;
 
 int randomLevel(int maxLevels)
 {
     int newLevel = 1;
-    while(drand48() < randomProbability && newLevel < maxLevels) {
+    while(drand48() < randomProbability && newLevel < maxLevels-1) {
         newLevel += 1;
     }
     return newLevel;
@@ -109,13 +146,15 @@ int searchSkipListString(struct C_SkipListSearch *search, const char *keyString)
     struct C_SkipListNode *x = list->head;
     int i;
     
+    // dumpSearch(search, "before search");
     for(i = list->level; i >= 1; i--) {
         while(x->next[i-1] != NULL && strcmp(x->next[i-1]->keyString, keyString) < 0) {
             x = x->next[i-1];
         }
         search->update[i-1] = x;
-        i -= 1;
     }
+    // dumpSearch(search, "after search");
+    // dumpNode(x, "x"); fprintf(stderr, ";\n");
     if (x->next[i-1] == NULL) {
         search->state = SEARCH_STATE_NOT_FOUND;
     } else {
@@ -129,6 +168,7 @@ int searchMatchedExactString(struct C_SkipListSearch *search, const char *keyStr
 {
     if(search->state != SEARCH_STATE_FOUND) return 0;
     if(search->node == NULL) return 0;
+    if(search->node->keyString == NULL) return keyString == NULL;
 
     return strcmp(search->node->keyString, keyString) == 0;
 }
@@ -180,11 +220,12 @@ int insertBeforePossibleMatch(struct C_SkipListSearch *search, struct C_SkipList
     search->state = SEARCH_STATE_NONE;
     search->node = NULL;
     
+    // dumpSearch(search, "insert");
     // If the new node is higher than the current level, fill up the update[] list
     // with head
-    while(level > list->level) {
-        list->level += 1;
+    while(level >= list->level) {
         search->update[list->level-1] = list->head;
+        list->level += 1;
     }
     
     // patch new node in to the saved nodes in the update[] list

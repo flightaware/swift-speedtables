@@ -89,7 +89,6 @@ public final class CSkipList: SequenceType {
     }
     
     public func search(equalTo key: String) -> ContiguousArray<String> {
-
         let s: UnsafeMutablePointer<C_SkipListSearch> = search(equalTo: key)
         guard s != nil else { return [] }
         defer { destroySkipListSearch(s); }
@@ -162,6 +161,23 @@ public final class CSkipList: SequenceType {
         
         // p == nil is a "can't happen", but if it did that means we didn't find a match.
         return p != nil;
+    }
+    
+    public func stats() {
+        let s = newSkipListSearch(list);
+        traverseSkipList(s)
+        var nodes = 0
+        var rows = 0
+        repeat {
+            let p = getMatchedValue(s)
+            if p == nil {
+                break
+            }
+            let v: SkipListValue = Unmanaged.fromOpaque(COpaquePointer(p)).takeUnretainedValue()
+            nodes += 1
+            rows += v.a.count;
+        } while advanceSearchNode(s) != 0
+        print("rows: \(rows), nodes: \(nodes)")
     }
     
     public func generate() -> AnyGenerator<(String, String)> {

@@ -68,7 +68,7 @@ for row in t.ageIndex.search(equalTo: 5) {
 }
 
 print("Change chip's age to 6,, and make sure there is only one chip")
-let chips: [TableRow] = t.nameIndex.search(equalTo: "chip")
+let chips: ContiguousArray<TableRow> = t.nameIndex.search(equalTo: "chip")
 if(chips.count == 1) {
     chips[0].age = 6
 } else {
@@ -165,7 +165,7 @@ for row in t.nameIndex.search(equalTo: "monty") { t.delete(row) }
 for row in t.nameIndex.search(equalTo: "gadget") { t.delete(row) }
 for row in t.nameIndex.search(equalTo: "mickey") { t.delete(row) }
 print("Deleting young draculas (no Student ID index)")
-var rows: [TableRow] = t.nameIndex.search(equalTo: "dracula")
+var rows: ContiguousArray<TableRow> = t.nameIndex.search(equalTo: "dracula")
 for row in rows {
     if row.age < 50 {
         t.delete(row)
@@ -240,8 +240,8 @@ func forspeedtables() -> Int {
     print("Total for speedtables \(tFinal)µs")
     return Int(tFinal)
 }
-//let speedtables = forspeedtables()
-//print("Speedtables delta: \(speedtables - overhead)µs, \(((speedtables - overhead) / overhead) * 100)%")
+let speedtables = forspeedtables()
+print("Speedtables delta: \(speedtables - overhead)µs, \(((speedtables - overhead) / overhead) * 100)%")
 
 let c = CSkipList(maxLevel: 20)
 

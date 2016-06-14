@@ -9,8 +9,8 @@
 import Foundation;
 
 class SkipListValue {
-    var a: [String];
-    init(v: [String]?) {
+    var a: ContiguousArray<String>
+    init(v: ContiguousArray<String>?) {
         if let a = v {
             self.a = a
         } else {
@@ -25,7 +25,7 @@ enum GenState {
     case Done
 }
 
-public class CSkipList: SequenceType {
+public final class CSkipList: SequenceType {
     var list: UnsafeMutablePointer<C_SkipList>
     let unique: Bool
     init(maxLevel: Int, unique: Bool = false, type: Int = Int(SKIPLIST_STRING)) {
@@ -64,7 +64,7 @@ public class CSkipList: SequenceType {
         return s
     }
     
-    public func search(greaterThanOrEqualTo key: String) -> [String] {
+    public func search(greaterThanOrEqualTo key: String) -> ContiguousArray<String> {
         let s: UnsafeMutablePointer<C_SkipListSearch> = search(greaterThanOrEqualTo: key)
         guard s != nil else { return [] }
         defer { destroySkipListSearch(s); }
@@ -88,7 +88,7 @@ public class CSkipList: SequenceType {
         return s
     }
     
-    public func search(equalTo key: String) -> [String] {
+    public func search(equalTo key: String) -> ContiguousArray<String> {
         let s: UnsafeMutablePointer<C_SkipListSearch> = search(equalTo: key)
         guard s != nil else { return [] }
         defer { destroySkipListSearch(s); }

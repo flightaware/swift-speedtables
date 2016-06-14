@@ -182,7 +182,7 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
     }
         
     public func insert(key: Key, value newValue: Value) {
-        var update = Array<UnsafeMutablePointer<SLNode<Key, Value>>?>(count: maxLevel, repeatedValue: nil)
+        var update = ContiguousArray<UnsafeMutablePointer<SLNode<Key, Value>>?>(count: maxLevel, repeatedValue: nil)
         var x = head
         var i: Int
         
@@ -241,7 +241,7 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
     }
     
     public func delete(key: Key, value: Value) -> Bool {
-        var update = Array<UnsafeMutablePointer<SLNode<Key, Value>>?>(count: maxLevel, repeatedValue: nil)
+        var update = ContiguousArray<UnsafeMutablePointer<SLNode<Key, Value>>?>(count: maxLevel, repeatedValue: nil)
         var x = head
         var i: Int
         

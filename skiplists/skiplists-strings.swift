@@ -10,7 +10,7 @@ import Foundation
 
 struct SLStringNode<Value: Equatable> {
     let key: String?
-    var values: [Value]
+    var values: ContiguousArray<Value>
     var level: Int
     var next: [UnsafeMutablePointer<SLStringNode<Value>>?]
     init(_ key: String?, value: Value? = nil, maxLevel: Int, level: Int = 0) {
@@ -82,7 +82,7 @@ public class StringSkipList<Value: Equatable>: SequenceType {
         return x
     }
 
-    public func search(greaterThanOrEqualTo key: String) -> [Value] {
+    public func search(greaterThanOrEqualTo key: String) -> ContiguousArray<Value> {
         let x: UnsafeMutablePointer<SLStringNode<Value>>? = search(greaterThanOrEqualTo: key)
         if let array = x?.memory.values {
             return array
@@ -107,7 +107,7 @@ public class StringSkipList<Value: Equatable>: SequenceType {
         return x != nil
     }
 
-    public func search(equalTo key: String) -> [Value] {
+    public func search(equalTo key: String) -> ContiguousArray<Value> {
         let x: UnsafeMutablePointer<SLStringNode<Value>>? = search(equalTo: key)
         if let array = x?.memory.values {
             return array
@@ -163,7 +163,7 @@ public class StringSkipList<Value: Equatable>: SequenceType {
     }
 
     public func insert(key: String, value newValue: Value) {
-        var update = Array<UnsafeMutablePointer<SLStringNode<Value>>?>(count: maxLevel, repeatedValue: nil)
+        var update = ContiguousArray<UnsafeMutablePointer<SLStringNode<Value>>?>(count: maxLevel, repeatedValue: nil)
         var x = head
         var i: Int
         
@@ -222,7 +222,7 @@ public class StringSkipList<Value: Equatable>: SequenceType {
     }
 
     public func delete(key: String, value: Value) -> Bool {
-        var update = Array<UnsafeMutablePointer<SLStringNode<Value>>?>(count: maxLevel, repeatedValue: nil)
+        var update = ContiguousArray<UnsafeMutablePointer<SLStringNode<Value>>?>(count: maxLevel, repeatedValue: nil)
         var x = head
         var i: Int
         

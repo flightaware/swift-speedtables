@@ -148,7 +148,10 @@ int searchSkipListString(struct C_SkipListSearch *search, const char *keyString)
     
     // dumpSearch(search, "before search");
     for(i = list->level; i >= 1; i--) {
-        while(x->next[i-1] != NULL && strcmp(x->next[i-1]->keyString, keyString) < 0) {
+        while(x->next[i-1] != NULL) {
+            if(x->next[i-1]->keyString[0] >= keyString[0] && strcmp(x->next[i-1]->keyString, keyString) >= 0) {
+                break;
+            }
             x = x->next[i-1];
         }
         search->update[i-1] = x;

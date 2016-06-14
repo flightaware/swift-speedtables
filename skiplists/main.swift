@@ -243,7 +243,7 @@ func forspeedtables() -> Int {
 //let speedtables = forspeedtables()
 //print("Speedtables delta: \(speedtables - overhead)µs, \(((speedtables - overhead) / overhead) * 100)%")
 
-let c = CSkipList<String>(maxLevel: 20)
+let c = CSkipList(maxLevel: 20)
 
 c.insert("Hello", value: "How do you do?")
 for (k, v) in c {

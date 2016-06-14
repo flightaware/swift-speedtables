@@ -34,9 +34,26 @@ public class CSkipList<Value: Equatable>: SequenceType {
     }
     deinit
     {
+        // release values
+        let s = newSkipListSearch(list);
+        traverseSkipList(s)
+        repeat {
+            deleteMatchedValues(s)
+        } while advanceSearchNode(s) != 0;
+        
+        // deallocate nodes
         destroySkipList(list)
         list = nil
     }
+
+    func deleteMatchedValues(s: UnsafeMutablePointer<C_SkipListSearch>) {
+        let p = getMatchedValue(s)
+        guard p != nil else { return; }
+        // Takeretainedvalue so it gets released when it goes out of scope.
+        let _: SkipListValue<Value> = Unmanaged.fromOpaque(COpaquePointer(p)).takeRetainedValue()
+        setMatchedValue(s, nil)
+    }
+
     func search(greaterThanOrEqualTo key: String) -> UnsafeMutablePointer<C_SkipListSearch> {
         let s = newSkipListSearch(list);
         guard s != nil else { return nil }

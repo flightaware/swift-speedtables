@@ -152,8 +152,10 @@ public class CSkipList<Value: Equatable>: SequenceType {
         }
         
         // release any swift-level data in the matched node
-        deleteMatchedValues(s);
-        
+        if p != nil {
+            deleteMatchedValues(s);
+        }
+
         // call c for the heavy lifting - remove the matched node from the list and free it
         deleteMatchedNode(s);
         

@@ -46,11 +46,23 @@ class TableRow: SpeedTableRow, Equatable {
     var parent: Table?
     var name: String {
         willSet { parent!.nameIndex.delete(name, value: self) }
-        didSet { parent!.nameIndex.insert(name, value: self) }
+        didSet {
+            do {
+                try self.parent!.nameIndex.insert(name, value: self)
+            } catch {
+                
+            }
+        }
     }
     var age: Int {
         willSet { parent!.ageIndex.delete(age, value: self) }
-        didSet { parent!.ageIndex.insert(age, value: self) }
+        didSet {
+            do {
+                try self.parent!.ageIndex.insert(age, value: self)
+            } catch {
+                
+            }
+        }
     }
     var school: String? // Unindexed value
     var studentIDStorage: String? // unique optional value
@@ -66,8 +78,16 @@ class TableRow: SpeedTableRow, Equatable {
         self.age = age
         // This needs to be done explicitly because the willSet/didSet doesn't
         // fire on initialization.
-        parent.nameIndex.insert(self.name, value: self)
-        parent.ageIndex.insert(self.age, value: self)
+        do {
+            try parent.nameIndex.insert(self.name, value: self)
+        } catch {
+            // can't happen, only reason insert can throw is if it's not unique
+        }
+        do {
+            try parent.ageIndex.insert(self.age, value: self)
+        } catch {
+            // can't happen, only reason insert can throw is if it's not unique
+        }
     }
     func delete() {
         parent!.nameIndex.delete(name, value: self)

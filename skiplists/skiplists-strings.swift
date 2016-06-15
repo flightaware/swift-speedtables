@@ -35,20 +35,18 @@ func freeSkipListStringNode<Value>(node: UnsafeMutablePointer<SLStringNode<Value
 public class StringSkipList<Value: Equatable>: SequenceType {
     let head: UnsafeMutablePointer<SLStringNode<Value>>
     let unique: Bool
-    let errorHandler: ((StringSkipListError) -> Void)?
     var maxLevel: Int
     var level: Int
     
-    public init(maxLevel: Int, unique: Bool = false, errorHandler: ((StringSkipListError) -> Void)? = nil) {
+    public init(maxLevel: Int, unique: Bool = false) {
         self.maxLevel = maxLevel
         self.level = 1
         self.unique = unique
-        self.errorHandler = errorHandler
         self.head = allocateSkipListStringNode(nil, maxLevel: maxLevel, level: maxLevel)
     }
     
-    public convenience init(maxNodes: Int, unique: Bool = false, errorHandler: ((StringSkipListError) -> Void)? = nil) {
-        self.init(maxLevel: SkipListMaxLevel(maxNodes), unique: unique, errorHandler: errorHandler)
+    public convenience init(maxNodes: Int, unique: Bool = false) {
+        self.init(maxLevel: SkipListMaxLevel(maxNodes), unique: unique)
     }
 
     deinit {
@@ -138,7 +136,7 @@ public class StringSkipList<Value: Equatable>: SequenceType {
         }
         keyStore = newKey
         if let k = newKey {
-            insert(k, value: value)
+            try insert(k, value: value)
         }
     }
 
@@ -159,10 +157,10 @@ public class StringSkipList<Value: Equatable>: SequenceType {
         // showtime -- remove the old entry, update the keystore, insert the new value
         delete(keyStore, value: value)
         keyStore = newKey
-        insert(keyStore, value: value)
+        try insert(keyStore, value: value)
     }
 
-    public func insert(key: String, value newValue: Value) {
+    public func insert(key: String, value newValue: Value) throws {
         var update = ContiguousArray<UnsafeMutablePointer<SLStringNode<Value>>?>(count: maxLevel, repeatedValue: nil)
         var x = head
         var i: Int
@@ -185,10 +183,7 @@ public class StringSkipList<Value: Equatable>: SequenceType {
             // the new value to the values array.
             if x.memory.key == key {
                 if unique {
-                    if errorHandler != nil {
-                        errorHandler!(StringSkipListError.KeyNotUnique(key: key))
-                    }
-                    return
+                    throw StringSkipListError.KeyNotUnique(key: key)
                 }
 
                 if x.memory.values.contains(newValue) {

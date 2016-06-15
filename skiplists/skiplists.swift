@@ -48,26 +48,21 @@ func freeSkipListNode<Key, Value>(node: UnsafeMutablePointer<SLNode<Key, Value>>
 }
 
 
-// Can't use a generic typealias here until Swift 3
-//typealias ErrorHandler<Key: Comparable> = (SkipListError<Key>) -> Void
-
 public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
     let head: UnsafeMutablePointer<SLNode<Key, Value>>
     let unique: Bool
-    let errorHandler: ((SkipListError<Key>) -> Void)?
     var maxLevel: Int
     var level: Int
     
-    public init(maxLevel: Int, unique: Bool = false, errorHandler: ((SkipListError<Key>) -> Void)? = nil) {
+    public init(maxLevel: Int, unique: Bool = false) {
         self.maxLevel = maxLevel
         self.level = 1
         self.unique = unique
-        self.errorHandler = errorHandler
         self.head = allocateSkipListNode(nil, maxLevel: maxLevel, level: maxLevel)
     }
     
-    public convenience init(maxNodes: Int, unique: Bool = false, errorHandler: ((SkipListError<Key>) -> Void)? = nil) {
-        self.init(maxLevel: SkipListMaxLevel(maxNodes), unique: unique, errorHandler: errorHandler)
+    public convenience init(maxNodes: Int, unique: Bool = false) {
+        self.init(maxLevel: SkipListMaxLevel(maxNodes), unique: unique)
     }
     
     deinit {
@@ -157,7 +152,7 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
         }
         keyStore = newKey
         if let k = newKey {
-            insert(k, value: value)
+            try insert(k, value: value)
         }
     }
     
@@ -178,10 +173,10 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
         // showtime -- remove the old entry, update the keystore, insert the new value
         delete(keyStore, value: value)
         keyStore = newKey
-        insert(keyStore, value: value)
+        try insert(keyStore, value: value)
     }
         
-    public func insert(key: Key, value newValue: Value) {
+    public func insert(key: Key, value newValue: Value) throws {
         var update = ContiguousArray<UnsafeMutablePointer<SLNode<Key, Value>>?>(count: maxLevel, repeatedValue: nil)
         var x = head
         var i: Int
@@ -204,10 +199,7 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
             // the new value to the values array.
             if x.memory.key == key {
                 if unique {
-                    if errorHandler != nil {
-                        errorHandler!(SkipListError<Key>.KeyNotUnique(key: key))
-                    }
-                    return
+                    throw SkipListError<Key>.KeyNotUnique(key: key)
                 }
 
                 if x.memory.values.contains(newValue) {

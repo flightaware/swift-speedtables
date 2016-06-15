@@ -98,7 +98,7 @@ public final class CSkipList: SequenceType {
         return v.a;
     }
 
-    public func insert(key: String, value newValue: String) -> Bool {
+    public func insert(key: String, value newValue: String) throws -> Bool {
         let s = newSkipListSearch(list);
         guard s != nil else { return false }
         defer { destroySkipListSearch(s); }

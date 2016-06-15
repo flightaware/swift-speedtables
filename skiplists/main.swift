@@ -13,18 +13,18 @@ print("Basic skiplist test")
 let l = SkipList<String, String>(maxLevel: 20)
 
 print("\nPopulating list.")
-l.insert("hello", value: "I say hello")
-l.insert("goodbye", value: "You say goodbye")
-l.insert("yes", value: "I say yes")
-l.insert("no", value: "You say no")
-l.insert("high", value: "I say high")
-l.insert("low", value: "you say low")
-l.insert("stop", value: "You say stop")
-l.insert("go", value: "I say go go go")
-l.insert("hello", value: "Hello my baby")
-l.insert("hello", value: "Hello my honey")
-l.insert("hello", value: "Hello my ragtime gal")
-l.insert("goodbye", value: "Goodnight America, and all the ships at sea")
+try l.insert("hello", value: "I say hello")
+try l.insert("goodbye", value: "You say goodbye")
+try l.insert("yes", value: "I say yes")
+try l.insert("no", value: "You say no")
+try l.insert("high", value: "I say high")
+try l.insert("low", value: "you say low")
+try l.insert("stop", value: "You say stop")
+try l.insert("go", value: "I say go go go")
+try l.insert("hello", value: "Hello my baby")
+try l.insert("hello", value: "Hello my honey")
+try l.insert("hello", value: "Hello my ragtime gal")
+try l.insert("goodbye", value: "Goodnight America, and all the ships at sea")
 print("Dumping list:")
 for (key, value) in l {
     print("    \(key): \(value)")
@@ -216,7 +216,7 @@ func forskiplists() -> Int {
             print("Inserting \(name), \(i) at \(Int(tNext) - Int(tLast))µs")
             tLast = tNext
         }
-        l.insert(name, value: String(i))
+        try! l.insert(name, value: String(i))
     }
     let tFinal = clock() - t0
     print("Total for skiplists \(tFinal)µs")
@@ -246,18 +246,18 @@ print("Speedtables delta: \(speedtables - overhead)µs, \(((speedtables - overhe
 let c = CSkipList(maxLevel: 20)
 
 print("\nPopulating list.")
-c.insert("hello", value: "I say hello")
-c.insert("goodbye", value: "You say goodbye")
-c.insert("yes", value: "I say yes")
-c.insert("no", value: "You say no")
-c.insert("high", value: "I say high")
-c.insert("low", value: "you say low")
-c.insert("stop", value: "You say stop")
-c.insert("go", value: "I say go go go")
-c.insert("hello", value: "Hello my baby")
-c.insert("hello", value: "Hello my honey")
-c.insert("hello", value: "Hello my ragtime gal")
-c.insert("goodbye", value: "Goodnight America, and all the ships at sea")
+try c.insert("hello", value: "I say hello")
+try c.insert("goodbye", value: "You say goodbye")
+try c.insert("yes", value: "I say yes")
+try c.insert("no", value: "You say no")
+try c.insert("high", value: "I say high")
+try c.insert("low", value: "you say low")
+try c.insert("stop", value: "You say stop")
+try c.insert("go", value: "I say go go go")
+try c.insert("hello", value: "Hello my baby")
+try c.insert("hello", value: "Hello my honey")
+try c.insert("hello", value: "Hello my ragtime gal")
+try c.insert("goodbye", value: "Goodnight America, and all the ships at sea")
 print("Dumping list:")
 for (key, value) in c {
     print("    \(key): \(value)")
@@ -290,7 +290,11 @@ func forCskiplists() -> Int {
             print("Inserting \(name), \(i) at \(Int(tNext) - Int(tLast))µs")
             tLast = tNext
         }
-        c.insert(name, value: String(i))
+        do {
+            try c.insert(name, value: String(i))
+        } catch {
+            // can't happen
+        }
     }
     let tFinal = clock() - t0
     print("Total for skiplists \(tFinal)µs")

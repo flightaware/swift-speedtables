@@ -33,7 +33,7 @@ for (key, value) in l {
 func delete_all(_ l: SkipList<String, String>, key: String) {
     for val in l.search(equalTo: key) {
         print("Deleting \((key, val))")
-        l.delete(key, value: val)
+        _ = l.delete(key, value: val)
     }
 }
 
@@ -52,15 +52,15 @@ print("\n\nSpeedtables test")
 let t = Table(maxLevel: 20)
 
 print("Adding cartoon characters")
-t.insert("Nick", age: 32) // "200 dollars a day since I was twelve"
-t.insert("Judy", age: 22) // Guess
-t.insert("chip", age: 5) // How old can a chipmunk be?
-t.insert("dale", age: 5)
+_ = t.insert("Nick", age: 32) // "200 dollars a day since I was twelve"
+_ = t.insert("Judy", age: 22) // Guess
+_ = t.insert("chip", age: 5) // How old can a chipmunk be?
+_ = t.insert("dale", age: 5)
 
 // Just use a fixed year for repeatability.
 let year = 2016
-t.insert("mickey", age: year - 1928) // Steamboat Willie
-t.insert("bugs", age: year - 1940) // A Wild Hare
+_ = t.insert("mickey", age: year - 1928) // Steamboat Willie
+_ = t.insert("bugs", age: year - 1940) // A Wild Hare
 
 print("Looking for 5 year olds")
 for row in t.ageIndex.search(equalTo: 5) {
@@ -76,24 +76,24 @@ if(chips.count == 1) {
 }
 
 print("Adding more cartoon characters")
-t.insert("gadget", age: 5)
-t.insert("monty", age: 8)
+_ = t.insert("gadget", age: 5)
+_ = t.insert("monty", age: 8)
 
 print("Adding dwarves. Dwarves are really old")
-t.insert("happy", age: 500)
-t.insert("sleepy", age: 500)
-t.insert("grumpy", age: 500)
+_ = t.insert("happy", age: 500)
+_ = t.insert("sleepy", age: 500)
+_ = t.insert("grumpy", age: 500)
 
 print("Adding vampires. They're really old too, and some have multiple ages")
-t.insert("lestat", age: 500)
-t.insert("dracula", age: 500)
-t.insert("dracula", age: year - 1897) // Book
-t.insert("dracula", age: year - 1931) // Bella Lugosi
-t.insert("dracula", age: year - 1958) // Christopher Lee
-t.insert("dracula", age: year - 1966) //  ""
-t.insert("dracula", age: year - 1970) //  ""
-t.insert("dracula", age: year - 1979) // Frank langella
-t.insert("dracula", age: year - 1992) // Gary Oldman
+_ = t.insert("lestat", age: 500)
+_ = t.insert("dracula", age: 500)
+_ = t.insert("dracula", age: year - 1897) // Book
+_ = t.insert("dracula", age: year - 1931) // Bella Lugosi
+_ = t.insert("dracula", age: year - 1958) // Christopher Lee
+_ = t.insert("dracula", age: year - 1966) //  ""
+_ = t.insert("dracula", age: year - 1970) //  ""
+_ = t.insert("dracula", age: year - 1979) // Frank langella
+_ = t.insert("dracula", age: year - 1992) // Gary Oldman
 
 print("Wait on, we can't have 500 year old schoolkids!")
 for row in t.ageIndex.search(equalTo: 500) {
@@ -234,7 +234,7 @@ func forspeedtables() -> Int {
             print("Inserting \(name), \(i) at \(Int(tNext) - Int(tLast))µs")
             tLast = tNext
         }
-        t.insert(name, age: i)
+        _ = t.insert(name, age: i)
     }
     let tFinal = clock() - t0
     print("Total for speedtables \(tFinal)µs")

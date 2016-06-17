@@ -18,7 +18,7 @@ private struct QueryState<Key: Comparable, Value: Equatable> {
     }
 }
 
-public class Query<Key: Comparable, Value: Equatable>: SequenceType {
+public class Query<Key: Comparable, Value: Equatable>: Sequence {
     let list: SkipList<Key, Value>
     let min: Key?
     let max: Key?
@@ -49,7 +49,7 @@ public class Query<Key: Comparable, Value: Equatable>: SequenceType {
         return QueryState<Key, Value>(node: node)
     }
     
-    private func step(inout state: QueryState<Key, Value>) {
+    private func step(_ state: inout QueryState<Key, Value>) {
         guard state.node != nil else { return }
         
         // step to the next index
@@ -95,10 +95,10 @@ public class Query<Key: Comparable, Value: Equatable>: SequenceType {
         return (state.node!.key!, state.node!.values[state.index])
     }
     
-    public func generate() -> AnyGenerator<(Key, Value)> {
+    public func makeIterator() -> AnyIterator<(Key, Value)> {
         var state = start()
         
-        return AnyGenerator<(Key, Value)> {
+        return AnyIterator<(Key, Value)> {
             self.step(&state)
             
             guard state.node != nil else { return nil }

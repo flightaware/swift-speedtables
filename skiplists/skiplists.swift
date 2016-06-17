@@ -10,7 +10,7 @@ import Foundation
 
 let randomProbability = 0.5
 
-func SkipListRandomLevel(maxLevel: Int) -> Int {
+func SkipListRandomLevel(_ maxLevel: Int) -> Int {
     var newLevel = 1
     while drand48() < randomProbability && newLevel < maxLevel {
         newLevel += 1
@@ -18,7 +18,7 @@ func SkipListRandomLevel(maxLevel: Int) -> Int {
     return newLevel
 }
 
-func SkipListMaxLevel(maxNodes: Int) -> Int {
+func SkipListMaxLevel(_ maxNodes: Int) -> Int {
         let logMaxNodes = log(Double(maxNodes)) / log(1.0 / randomProbability)
         return Int(round(logMaxNodes))
 }
@@ -32,11 +32,11 @@ class SLNode<Key: Comparable, Value: Equatable> {
         self.key = key
         self.values = (value == nil) ? [] : [value!]
         self.level = (level > 0) ? level : SkipListRandomLevel(maxLevel)
-        self.next = Array<SLNode<Key, Value>?>(count: maxLevel, repeatedValue: nil)
+        self.next = Array<SLNode<Key, Value>?>(repeating: nil, count: maxLevel)
     }
 }
 
-public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
+public class SkipList<Key: Comparable, Value: Equatable>: Sequence {
     let head: SLNode<Key, Value>
     let unique: Bool
     var maxLevel: Int
@@ -57,7 +57,7 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
         var x = head
         
         // look for the key
-        for i in (1 ... self.level).reverse() {
+        for i in (1 ... self.level).reversed() {
             while x.next[i-1] != nil && x.next[i-1]!.key < key {
                 x = x.next[i-1]!
             }
@@ -94,7 +94,7 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
         }
     }
     
-    public func exists(key: Key) -> Bool {
+    public func exists(_ key: Key) -> Bool {
         let x: SLNode<Key, Value>? = search(equalTo: key)
         return x != nil
     }
@@ -109,7 +109,7 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
     }
     
     // Replace an entry in a skiplist - for optional keys
-    public func replace(newKey: Key?, inout keyStore: Key?, value: Value) throws {
+    public func replace(_ newKey: Key?, keyStore: inout Key?, value: Value) throws {
         // no change - no work
         if newKey == keyStore {
             return
@@ -119,7 +119,7 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
         if unique {
             if let k = newKey {
                 if exists(k) {
-                    throw SkipListError.KeyNotUnique(key: k)
+                    throw SkipListError.keyNotUnique(key: k)
                 }
             }
         }
@@ -135,7 +135,7 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
     }
     
     // Replace an entry in a skiplist - for non-optional keys
-    public func replace(newKey: Key, inout keyStore: Key, value: Value) throws {
+    public func replace(_ newKey: Key, keyStore: inout Key, value: Value) throws {
         // no change - no work
         if newKey == keyStore {
             return
@@ -144,7 +144,7 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
         // If it's supposed to be unique, throw an error if it's not
         if unique {
             if exists(newKey) {
-                throw SkipListError.KeyNotUnique(key: newKey)
+                throw SkipListError.keyNotUnique(key: newKey)
             }
         }
         
@@ -154,8 +154,8 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
         try insert(keyStore, value: value)
     }
         
-    public func insert(key: Key, value newValue: Value) throws {
-        var update = Array<SLNode<Key, Value>?>(count: maxLevel, repeatedValue: nil)
+    public func insert(_ key: Key, value newValue: Value) throws {
+        var update = Array<SLNode<Key, Value>?>(repeating: nil, count: maxLevel)
         var x = head
         var i: Int
         
@@ -177,7 +177,7 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
             // the new value to the values array.
             if x.key == key {
                 if unique {
-                    throw SkipListError<Key>.KeyNotUnique(key: key)
+                    throw SkipListError<Key>.keyNotUnique(key: key)
                 }
                 
                 if x.values.contains(newValue) {
@@ -210,8 +210,8 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
         }
     }
     
-    public func delete(key: Key, value: Value) -> Bool {
-        var update = Array<SLNode<Key, Value>?>(count: maxLevel, repeatedValue: nil)
+    public func delete(_ key: Key, value: Value) -> Bool {
+        var update = Array<SLNode<Key, Value>?>(repeating: nil, count: maxLevel)
         var x = head
         var i: Int
         
@@ -239,7 +239,7 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
         }
         
         // look for match in values
-        let foundIndex = x.values.indexOf(value)
+        let foundIndex = x.values.index(of: value)
         
         // If we didn't find a matching value, we didn't actually find a match
         if(foundIndex == nil) {
@@ -247,7 +247,7 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
         }
         
         // Remove the value we found, and if it wasn't the last one return success
-        x.values.removeAtIndex(foundIndex!)
+        x.values.remove(at: foundIndex!)
         if(x.values.count > 0) {
             return true
         }
@@ -273,11 +273,11 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
         return true
     }
     
-    public func generate() -> AnyGenerator<(Key, Value)> {
+    public func makeIterator() -> AnyIterator<(Key, Value)> {
         var row = head
         var index = -1
         
-        return AnyGenerator<(Key, Value)> {
+        return AnyIterator<(Key, Value)> {
             if index < 0 || index >= row.values.count {
                 repeat {
                     guard row.next[0] != nil else { return nil }
@@ -315,12 +315,12 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
         return query(max: key, maxEqual: false)
     }
     
-    func query(min min: Key? = nil, max: Key? = nil, minEqual: Bool = false, maxEqual: Bool = false) -> Query<Key, Value> {
+    func query(min: Key? = nil, max: Key? = nil, minEqual: Bool = false, maxEqual: Bool = false) -> Query<Key, Value> {
         return Query<Key, Value>(list: self, min: min, max: max, minEqual: minEqual, maxEqual: maxEqual)
     }
 }
 
 // Skiplist errors
-public enum SkipListError<Key>: ErrorType {
-    case KeyNotUnique(key: Key)
+public enum SkipListError<Key>: ErrorProtocol {
+    case keyNotUnique(key: Key)
 }

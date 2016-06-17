@@ -30,11 +30,11 @@ class Table: SpeedTable {
         ageIndex = SkipList<Int, TableRow>(maxNodes: size, unique: false)
         studentIDIndex = SkipList<String, TableRow>(maxNodes: size, unique: true)
     }
-    func insert(name: String, age: Int) -> TableRow {
+    func insert(_ name: String, age: Int) -> TableRow {
         // Creating the table row does all the insertion stuff
         return TableRow(parent: self, name: name, age: age)
     }
-    func delete(row: TableRow) {
+    func delete(_ row: TableRow) {
         // delegate to row
         row.delete()
     }
@@ -69,7 +69,7 @@ class TableRow: SpeedTableRow, Equatable {
     func getStudentID() -> String? {
         return studentIDStorage
     }
-    func setStudentID(ID: String?) throws {
+    func setStudentID(_ ID: String?) throws {
         try parent!.studentIDIndex.replace(ID, keyStore: &studentIDStorage, value: self)
     }
     init(parent: Table, name: String, age: Int) {

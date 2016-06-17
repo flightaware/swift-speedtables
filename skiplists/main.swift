@@ -30,7 +30,7 @@ for (key, value) in l {
     print("    \(key): \(value)")
 }
 
-func delete_all(l: SkipList<String, String>, key: String) {
+func delete_all(_ l: SkipList<String, String>, key: String) {
     for val in l.search(equalTo: key) {
         print("Deleting \((key, val))")
         l.delete(key, value: val)
@@ -181,7 +181,7 @@ for (key, row) in t.studentIDIndex {
 }
 
 print("\nSpeed test")
-func randomString(length: Int = 6) -> String {
+func randomString(_ length: Int = 6) -> String {
     let letters = ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"]
     var string = ""
     for _ in 0..<length {

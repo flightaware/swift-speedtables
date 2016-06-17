@@ -45,20 +45,20 @@ class Table: SpeedTable {
 class TableRow: SpeedTableRow, Equatable {
     var parent: Table?
     var name: String {
-        willSet { _ = parent!.nameIndex.delete(name, value: self) }
+        willSet { _ = parent!.nameIndex.delete(key: name, value: self) }
         didSet {
             do {
-                try self.parent!.nameIndex.insert(name, value: self)
+                try self.parent!.nameIndex.insert(key: name, value: self)
             } catch {
                 
             }
         }
     }
     var age: Int {
-        willSet { _ = parent!.ageIndex.delete(age, value: self) }
+        willSet { _ = parent!.ageIndex.delete(key: age, value: self) }
         didSet {
             do {
-                try self.parent!.ageIndex.insert(age, value: self)
+                try self.parent!.ageIndex.insert(key: age, value: self)
             } catch {
                 
             }
@@ -70,7 +70,7 @@ class TableRow: SpeedTableRow, Equatable {
         return studentIDStorage
     }
     func setStudentID(_ ID: String?) throws {
-        try parent!.studentIDIndex.replace(ID, keyStore: &studentIDStorage, value: self)
+        try parent!.studentIDIndex.replace(newKey: ID, keyStore: &studentIDStorage, value: self)
     }
     init(parent: Table, name: String, age: Int) {
         self.parent = parent
@@ -79,21 +79,21 @@ class TableRow: SpeedTableRow, Equatable {
         // This needs to be done explicitly because the willSet/didSet doesn't
         // fire on initialization.
         do {
-            try parent.nameIndex.insert(self.name, value: self)
+            try parent.nameIndex.insert(key: self.name, value: self)
         } catch {
             // can't happen, only reason insert can throw is if it's not unique
         }
         do {
-            try parent.ageIndex.insert(self.age, value: self)
+            try parent.ageIndex.insert(key: self.age, value: self)
         } catch {
             // can't happen, only reason insert can throw is if it's not unique
         }
     }
     func delete() {
-        _ = parent!.nameIndex.delete(name, value: self)
-        _ = parent!.ageIndex.delete(age, value:self)
+        _ = parent!.nameIndex.delete(key: name, value: self)
+        _ = parent!.ageIndex.delete(key: age, value:self)
         if let ID = studentIDStorage {
-            _ = parent!.studentIDIndex.delete(ID, value:self)
+            _ = parent!.studentIDIndex.delete(key: ID, value:self)
         }
         parent = nil // do not modify a row after it's deleted!
     }

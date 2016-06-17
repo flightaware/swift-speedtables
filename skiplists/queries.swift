@@ -49,7 +49,7 @@ public class Query<Key: Comparable, Value: Equatable>: Sequence {
         return QueryState<Key, Value>(node: node)
     }
     
-    private func step(_ state: inout QueryState<Key, Value>) {
+    private func step(state: inout QueryState<Key, Value>) {
         guard state.node != nil else { return }
         
         // step to the next index
@@ -88,7 +88,7 @@ public class Query<Key: Comparable, Value: Equatable>: Sequence {
     }
     
     public func next() -> (Key, Value)? {
-        step(&state)
+        step(state: &state)
         
         guard state.node != nil else { return nil }
         
@@ -99,7 +99,7 @@ public class Query<Key: Comparable, Value: Equatable>: Sequence {
         var state = start()
         
         return AnyIterator<(Key, Value)> {
-            self.step(&state)
+            self.step(state: &state)
             
             guard state.node != nil else { return nil }
             

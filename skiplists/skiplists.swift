@@ -10,7 +10,7 @@ import Foundation
 
 let randomProbability = 0.5
 
-func SkipListRandomLevel(_ maxLevel: Int) -> Int {
+func SkipListRandomLevel(maxLevel: Int) -> Int {
     var newLevel = 1
     while drand48() < randomProbability && newLevel < maxLevel {
         newLevel += 1
@@ -18,7 +18,7 @@ func SkipListRandomLevel(_ maxLevel: Int) -> Int {
     return newLevel
 }
 
-func SkipListMaxLevel(_ maxNodes: Int) -> Int {
+func SkipListMaxLevel(maxNodes: Int) -> Int {
         let logMaxNodes = log(Double(maxNodes)) / log(1.0 / randomProbability)
         return Int(round(logMaxNodes))
 }
@@ -31,7 +31,7 @@ class SLNode<Key: Comparable, Value: Equatable> {
     init(_ key: Key?, value: Value? = nil, maxLevel: Int, level: Int = 0) {
         self.key = key
         self.values = (value == nil) ? [] : [value!]
-        self.level = (level > 0) ? level : SkipListRandomLevel(maxLevel)
+        self.level = (level > 0) ? level : SkipListRandomLevel(maxLevel: maxLevel)
         self.next = Array<SLNode<Key, Value>?>(repeating: nil, count: maxLevel)
     }
 }
@@ -50,7 +50,7 @@ public class SkipList<Key: Comparable, Value: Equatable>: Sequence {
     }
 
     public convenience init(maxNodes: Int, unique: Bool = false) {
-        self.init(maxLevel: SkipListMaxLevel(maxNodes), unique: unique)
+        self.init(maxLevel: SkipListMaxLevel(maxNodes: maxNodes), unique: unique)
     }
     
     func search(greaterThanOrEqualTo key: Key) -> SLNode<Key, Value>? {
@@ -109,7 +109,7 @@ public class SkipList<Key: Comparable, Value: Equatable>: Sequence {
     }
     
     // Replace an entry in a skiplist - for optional keys
-    public func replace(_ newKey: Key?, keyStore: inout Key?, value: Value) throws {
+    public func replace(newKey: Key?, keyStore: inout Key?, value: Value) throws {
         // no change - no work
         if newKey == keyStore {
             return
@@ -126,16 +126,16 @@ public class SkipList<Key: Comparable, Value: Equatable>: Sequence {
         
         // showtime -- remove the old entry, update the keystore, insert the new value
         if let k = keyStore {
-            _ = delete(k, value: value)
+            _ = delete(key: k, value: value)
         }
         keyStore = newKey
         if let k = newKey {
-            try insert(k, value: value)
+            try insert(key: k, value: value)
         }
     }
     
     // Replace an entry in a skiplist - for non-optional keys
-    public func replace(_ newKey: Key, keyStore: inout Key, value: Value) throws {
+    public func replace(newKey: Key, keyStore: inout Key, value: Value) throws {
         // no change - no work
         if newKey == keyStore {
             return
@@ -149,12 +149,12 @@ public class SkipList<Key: Comparable, Value: Equatable>: Sequence {
         }
         
         // showtime -- remove the old entry, update the keystore, insert the new value
-        _ = delete(keyStore, value: value)
+        _ = delete(key: keyStore, value: value)
         keyStore = newKey
-        try insert(keyStore, value: value)
+        try insert(key: keyStore, value: value)
     }
         
-    public func insert(_ key: Key, value newValue: Value) throws {
+    public func insert(key: Key, value newValue: Value) throws {
         var update = Array<SLNode<Key, Value>?>(repeating: nil, count: maxLevel)
         var x = head
         var i: Int
@@ -191,7 +191,7 @@ public class SkipList<Key: Comparable, Value: Equatable>: Sequence {
         }
         
         // Pick a random level for the new node
-        let level = SkipListRandomLevel(maxLevel)
+        let level = SkipListRandomLevel(maxLevel: maxLevel)
         
         // If the new node is higher than the current level, fill up the update[] list
         // with head
@@ -210,7 +210,7 @@ public class SkipList<Key: Comparable, Value: Equatable>: Sequence {
         }
     }
     
-    public func delete(_ key: Key, value: Value) -> Bool {
+    public func delete(key: Key, value: Value) -> Bool {
         var update = Array<SLNode<Key, Value>?>(repeating: nil, count: maxLevel)
         var x = head
         var i: Int

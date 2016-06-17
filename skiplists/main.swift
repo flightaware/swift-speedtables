@@ -13,18 +13,18 @@ print("Basic skiplist test")
 let l = SkipList<String, String>(maxLevel: 20)
 
 print("\nPopulating list.")
-try l.insert("hello", value: "I say hello")
-try l.insert("goodbye", value: "You say goodbye")
-try l.insert("yes", value: "I say yes")
-try l.insert("no", value: "You say no")
-try l.insert("high", value: "I say high")
-try l.insert("low", value: "you say low")
-try l.insert("stop", value: "You say stop")
-try l.insert("go", value: "I say go go go")
-try l.insert("hello", value: "Hello my baby")
-try l.insert("hello", value: "Hello my honey")
-try l.insert("hello", value: "Hello my ragtime gal")
-try l.insert("goodbye", value: "Goodnight America, and all the ships at sea")
+try l.insert(key: "hello", value: "I say hello")
+try l.insert(key: "goodbye", value: "You say goodbye")
+try l.insert(key: "yes", value: "I say yes")
+try l.insert(key: "no", value: "You say no")
+try l.insert(key: "high", value: "I say high")
+try l.insert(key: "low", value: "you say low")
+try l.insert(key: "stop", value: "You say stop")
+try l.insert(key: "go", value: "I say go go go")
+try l.insert(key: "hello", value: "Hello my baby")
+try l.insert(key: "hello", value: "Hello my honey")
+try l.insert(key: "hello", value: "Hello my ragtime gal")
+try l.insert(key: "goodbye", value: "Goodnight America, and all the ships at sea")
 print("Dumping list:")
 for (key, value) in l {
     print("    \(key): \(value)")
@@ -33,7 +33,7 @@ for (key, value) in l {
 func delete_all(_ l: SkipList<String, String>, key: String) {
     for val in l.search(equalTo: key) {
         print("Deleting \((key, val))")
-        _ = l.delete(key, value: val)
+        _ = l.delete(key: key, value: val)
     }
 }
 
@@ -216,7 +216,7 @@ func forskiplists() -> Int {
             print("Inserting \(name), \(i) at \(Int(tNext) - Int(tLast))µs")
             tLast = tNext
         }
-        try! l.insert(name, value: String(i))
+        try! l.insert(key: name, value: String(i))
     }
     let tFinal = clock() - t0
     print("Total for skiplists \(tFinal)µs")

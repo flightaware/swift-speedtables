@@ -48,7 +48,7 @@ public class SkipList<Key: Comparable, Value: Equatable>: Sequence {
         self.unique = unique
         self.head = SLNode<Key, Value>(nil, maxLevel: maxLevel, level: maxLevel)
     }
-    
+
     public convenience init(maxNodes: Int, unique: Bool = false) {
         self.init(maxLevel: SkipListMaxLevel(maxNodes), unique: unique)
     }
@@ -126,7 +126,7 @@ public class SkipList<Key: Comparable, Value: Equatable>: Sequence {
         
         // showtime -- remove the old entry, update the keystore, insert the new value
         if let k = keyStore {
-            delete(k, value: value)
+            _ = delete(k, value: value)
         }
         keyStore = newKey
         if let k = newKey {
@@ -149,7 +149,7 @@ public class SkipList<Key: Comparable, Value: Equatable>: Sequence {
         }
         
         // showtime -- remove the old entry, update the keystore, insert the new value
-        delete(keyStore, value: value)
+        _ = delete(keyStore, value: value)
         keyStore = newKey
         try insert(keyStore, value: value)
     }

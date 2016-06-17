@@ -45,7 +45,7 @@ class Table: SpeedTable {
 class TableRow: SpeedTableRow, Equatable {
     var parent: Table?
     var name: String {
-        willSet { parent!.nameIndex.delete(name, value: self) }
+        willSet { _ = parent!.nameIndex.delete(name, value: self) }
         didSet {
             do {
                 try self.parent!.nameIndex.insert(name, value: self)
@@ -55,7 +55,7 @@ class TableRow: SpeedTableRow, Equatable {
         }
     }
     var age: Int {
-        willSet { parent!.ageIndex.delete(age, value: self) }
+        willSet { _ = parent!.ageIndex.delete(age, value: self) }
         didSet {
             do {
                 try self.parent!.ageIndex.insert(age, value: self)
@@ -90,10 +90,10 @@ class TableRow: SpeedTableRow, Equatable {
         }
     }
     func delete() {
-        parent!.nameIndex.delete(name, value: self)
-        parent!.ageIndex.delete(age, value:self)
+        _ = parent!.nameIndex.delete(name, value: self)
+        _ = parent!.ageIndex.delete(age, value:self)
         if let ID = studentIDStorage {
-            parent!.studentIDIndex.delete(ID, value:self)
+            _ = parent!.studentIDIndex.delete(ID, value:self)
         }
         parent = nil // do not modify a row after it's deleted!
     }

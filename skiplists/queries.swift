@@ -20,17 +20,17 @@ private struct QueryState<Key: Comparable, Value: Equatable> {
 
 public class Query<Key: Comparable, Value: Equatable>: Sequence {
     let list: SkipList<Key, Value>
-    let min: Key?
-    let max: Key?
+    let minKey: Key?
+    let maxKey: Key?
     let minEqual: Bool
     let maxEqual: Bool
     private var state: QueryState<Key, Value>
     
-    init(list: SkipList<Key, Value>, min: Key? = nil, max: Key? = nil, minEqual: Bool = true, maxEqual: Bool = true) {
+    init(list: SkipList<Key, Value>, min minKey: Key? = nil, max maxKey: Key? = nil, minEqual: Bool = true, maxEqual: Bool = true) {
         self.list = list
-        self.min = min
+        self.minKey = minKey
         self.minEqual = minEqual
-        self.max = max
+        self.maxKey = maxKey
         self.maxEqual = maxEqual
         self.state = QueryState<Key, Value>(node: nil)
     }
@@ -38,11 +38,11 @@ public class Query<Key: Comparable, Value: Equatable>: Sequence {
     private func start() -> QueryState<Key, Value> {
         var node: SLNode<Key, Value>?
 
-        if min == nil {
+        if minKey == nil {
             node = list.head.next[0]
         } else {
-            node = list.search(greaterThanOrEqualTo: min!)
-            if node != nil && minEqual == false && node!.key == min {
+            node = list.search(greaterThanOrEqualTo: minKey!)
+            if node != nil && minEqual == false && node!.key == minKey {
                 node = node!.next[0]
             }
         }
@@ -65,14 +65,14 @@ public class Query<Key: Comparable, Value: Equatable>: Sequence {
         if state.node == nil { return }
         
         // If there's no max, our work is done
-        if max == nil { return }
+        if maxKey == nil { return }
         
         if maxEqual {
-            if max < state.node!.key {
+            if maxKey < state.node!.key {
                 state.node = nil
             }
         } else {
-            if max <= state.node!.key {
+            if maxKey <= state.node!.key {
                 state.node = nil
             }
         }

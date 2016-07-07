@@ -68,7 +68,7 @@ public class SkipList<Key: Comparable, Value: Equatable>: Sequence {
             return nil
         }
         
-        // no, are we looking at a valid node?
+        // no, step into the found node (and if not found, we'll automatically return nil)
         x = x.next[0]!
         
         return x
@@ -126,7 +126,7 @@ public class SkipList<Key: Comparable, Value: Equatable>: Sequence {
         
         // showtime -- remove the old entry, update the keystore, insert the new value
         if let k = keyStore {
-            _ = delete(key: k, value: value)
+            _ = delete(key: k, value: value) // we don't care if we're replacing or inserting.
         }
         keyStore = newKey
         if let k = newKey {
@@ -278,12 +278,12 @@ public class SkipList<Key: Comparable, Value: Equatable>: Sequence {
         var index = -1
         
         return AnyIterator<(Key, Value)> {
-            if index < 0 || index >= row.values.count {
-                repeat {
-                    guard row.next[0] != nil else { return nil }
+            if index < 0 || index >= row.values.count { // if initializing or finished with this node
+                repeat {// advance through list while skipping empty rows
+                    guard row.next[0] != nil else { return nil } // end of list, signal to Iterator
                     row = row.next[0]!
-                } while row.values.count == 0
-                index = 0
+                } while row.values.count == 0 // shouldn't happen, but let's check anyway, ok?
+                index = 0 // and point to beginning of index
             }
             let next = row.values[index]
             index += 1

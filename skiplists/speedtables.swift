@@ -13,3 +13,8 @@ protocol SpeedTable {
 
 protocol SpeedTableRow {
 }
+
+// SpeedTable protocol errors
+public enum SpeedTableError<Key>: ErrorType {
+    case KeyNotUnique(key: Key)
+}

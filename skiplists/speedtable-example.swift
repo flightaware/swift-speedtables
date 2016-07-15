@@ -60,7 +60,7 @@ class TableRow: SpeedTableRow, Equatable {
     func setStudentID(ID: String?) throws {
         if let key = ID {
             if parent!.studentIDIndex.exists(key) {
-                throw SkipListError.KeyNotUnique(key: key)
+                throw SpeedTableError.KeyNotUnique(key: key)
             }
         }
         parent!.studentIDIndex.replace(ID, keyStore: &studentIDStorage, value: self)

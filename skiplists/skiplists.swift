@@ -66,10 +66,7 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
             return nil
         }
         
-        // no, are we looking at a valid node?
-        x = x.next[0]!
-        
-        return x
+        return x.next[0]!
     }
     
     public func search(greaterThanOrEqualTo key: Key) -> [Value] {
@@ -99,8 +96,8 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
     
     public func exists(key: Key, value: Value) -> Bool {
         let x: SLNode<Key, Value>? = search(equalTo: key)
-        if let v = x?.values {
-            return v.contains(value)
+        if let array = x?.values {
+            return array.contains(value)
         }
         return false;
     }
@@ -304,9 +301,4 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
     func query(min min: Key? = nil, max: Key? = nil, minEqual: Bool = false, maxEqual: Bool = false) -> Query<Key, Value> {
         return Query<Key, Value>(list: self, min: min, max: max, minEqual: minEqual, maxEqual: maxEqual)
     }
-}
-
-// Skiplist errors
-public enum SkipListError<Key>: ErrorType {
-    case KeyNotUnique(key: Key)
 }

@@ -15,10 +15,15 @@ class Table: SpeedTable {
     let nameIndex: SkipList<String, TableRow>
     let ageIndex: SkipList<Int, TableRow>
     let studentIDIndex: SkipList<String, TableRow>
+    init(maxLevel: Int) {
+        nameIndex = SkipList<String, TableRow>(maxLevel: maxLevel)
+        ageIndex = SkipList<Int, TableRow>(maxLevel: maxLevel)
+        studentIDIndex = SkipList<String, TableRow>(maxLevel: maxLevel)
+    }
     init(size: Int) {
-        nameIndex = SkipList<String, TableRow>(maxLevel: size, unique: false)
-        ageIndex = SkipList<Int, TableRow>(maxLevel: size, unique: false)
-        studentIDIndex = SkipList<String, TableRow>(maxLevel: size, unique: true)
+        nameIndex = SkipList<String, TableRow>(maxNodes: size)
+        ageIndex = SkipList<Int, TableRow>(maxNodes: size)
+        studentIDIndex = SkipList<String, TableRow>(maxNodes: size)
     }
     func insert(name: String, age: Int) -> TableRow {
         // Creating the table row does all the insertion stuff
@@ -48,13 +53,18 @@ class TableRow: SpeedTableRow, Equatable {
         return studentIDStorage
     }
     func setStudentID(ID: String?) throws {
-        try parent!.studentIDIndex.replace(ID, keyStore: &studentIDStorage, value: self)
+        if let key = ID {
+            if parent!.studentIDIndex.exists(key) {
+                throw SpeedTableError.KeyNotUnique(key: key)
+            }
+        }
+        parent!.studentIDIndex.replace(ID, keyStore: &studentIDStorage, value: self)
     }
     init(parent: Table, name: String, age: Int) {
         self.parent = parent
         self.name = name
         self.age = age
-        // This needs to be done  explicitly because the willSet/didSet doesn't
+        // This needs to be done explicitly because the willSet/didSet doesn't
         // fire on initialization.
         parent.nameIndex.insert(self.name, value: self)
         parent.ageIndex.insert(self.age, value: self)
@@ -108,13 +118,12 @@ for row in table.nameIndex.search(equal: myName) {
 
 Indexes are skiplists:
  
-* ```thingIndex = SkipList<Type, TableRow>(maxLevel, unique, errorHandler)```
-* ```thingIndex = SkipList<Type, TableRow>(maxSize, unique, errorHandler)```
+* ```thingIndex = SkipList<Type, TableRow>(maxLevel: maxLevel)```
+* ```thingIndex = SkipList<Type, TableRow>(maxSize: maxSize)```
 
 ** maxLevel - maximum depth of the list, at least log(2) maximum nodes
 ** maxSize - maximum number of nodes (convenience init)
 ** unique - true if the index is unique
-** errorHandler: A function to handle background errors: ((SkipListError<Key>) -> Void) - required for catching non-unique entries on a unique index.
 
 The operations on indexes are:
 
@@ -126,6 +135,11 @@ Search looks up a key and returns an array of rows that match the key. This is j
 * ```skiplist.delete(key, value)```
 
 You will not be using these directly in speedtables. The insert and delete a key-value pair from the index.
+
+* ```skiplist.exists(key)```
+* ```skiplist.exists(key, value)```
+
+Helper functions for handling unique lists.
 
 * ```for (key, value) in skiplist```
 

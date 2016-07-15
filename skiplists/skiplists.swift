@@ -38,19 +38,17 @@ class SLNode<Key: Comparable, Value: Equatable> {
 
 public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
     let head: SLNode<Key, Value>
-    let unique: Bool
     var maxLevel: Int
     var level: Int
     
-    public init(maxLevel: Int, unique: Bool = false) {
+    public init(maxLevel: Int) {
         self.maxLevel = maxLevel
         self.level = 1
-        self.unique = unique
         self.head = SLNode<Key, Value>(nil, maxLevel: maxLevel, level: maxLevel)
     }
     
-    public convenience init(maxNodes: Int, unique: Bool = false) {
-        self.init(maxLevel: SkipListMaxLevel(maxNodes), unique: unique)
+    public convenience init(maxNodes: Int) {
+        self.init(maxLevel: SkipListMaxLevel(maxNodes))
     }
     
     func search(greaterThanOrEqualTo key: Key) -> SLNode<Key, Value>? {
@@ -99,6 +97,14 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
         return x != nil
     }
     
+    public func exists(key: Key, value: Value) -> Bool {
+        let x: SLNode<Key, Value>? = search(equalTo: key)
+        if let v = x?.values {
+            return v.contains(value)
+        }
+        return false;
+    }
+    
     public func search(equalTo key: Key) -> [Value] {
         let x: SLNode<Key, Value>? = search(equalTo: key)
         if let array = x?.values {
@@ -109,19 +115,10 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
     }
     
     // Replace an entry in a skiplist - for optional keys
-    public func replace(newKey: Key?, inout keyStore: Key?, value: Value) throws {
+    public func replace(newKey: Key?, inout keyStore: Key?, value: Value) {
         // no change - no work
         if newKey == keyStore {
             return
-        }
-        
-        // If it's supposed to be unique, throw an error if it's not
-        if unique {
-            if let k = newKey {
-                if exists(k) {
-                    throw SkipListError.KeyNotUnique(key: k)
-                }
-            }
         }
         
         // showtime -- remove the old entry, update the keystore, insert the new value
@@ -130,31 +127,24 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
         }
         keyStore = newKey
         if let k = newKey {
-            try insert(k, value: value)
+            insert(k, value: value)
         }
     }
     
     // Replace an entry in a skiplist - for non-optional keys
-    public func replace(newKey: Key, inout keyStore: Key, value: Value) throws {
+    public func replace(newKey: Key, inout keyStore: Key, value: Value) {
         // no change - no work
         if newKey == keyStore {
             return
         }
         
-        // If it's supposed to be unique, throw an error if it's not
-        if unique {
-            if exists(newKey) {
-                throw SkipListError.KeyNotUnique(key: newKey)
-            }
-        }
-        
         // showtime -- remove the old entry, update the keystore, insert the new value
         delete(keyStore, value: value)
         keyStore = newKey
-        try insert(keyStore, value: value)
+        insert(keyStore, value: value)
     }
         
-    public func insert(key: Key, value newValue: Value) throws {
+    public func insert(key: Key, value newValue: Value) {
         var update = Array<SLNode<Key, Value>?>(count: maxLevel, repeatedValue: nil)
         var x = head
         var i: Int
@@ -176,10 +166,6 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
             // If we're looking at the right key already, then there's nothing to insert. Just add
             // the new value to the values array.
             if x.key == key {
-                if unique {
-                    throw SkipListError<Key>.KeyNotUnique(key: key)
-                }
-                
                 if x.values.contains(newValue) {
                     return
                 }

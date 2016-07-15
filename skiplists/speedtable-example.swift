@@ -46,11 +46,11 @@ class TableRow: SpeedTableRow, Equatable {
     var parent: Table?
     var name: String {
         willSet { parent!.nameIndex.delete(name, value: self) }
-        didSet { self.parent!.nameIndex.insert(name, value: self) }
+        didSet { parent!.nameIndex.insert(name, value: self) }
     }
     var age: Int {
         willSet { parent!.ageIndex.delete(age, value: self) }
-        didSet { self.parent!.ageIndex.insert(age, value: self) }
+        didSet { parent!.ageIndex.insert(age, value: self) }
     }
     var school: String? // Unindexed value
     var studentIDStorage: String? // unique optional value

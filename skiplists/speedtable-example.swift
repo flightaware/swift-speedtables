@@ -21,14 +21,14 @@ class Table: SpeedTable {
     let ageIndex: SkipList<Int, TableRow>
     let studentIDIndex: SkipList<String, TableRow>
     init(maxLevel: Int) {
-        nameIndex = SkipList<String, TableRow>(maxLevel: maxLevel, unique: false)
-        ageIndex = SkipList<Int, TableRow>(maxLevel: maxLevel, unique: false)
-        studentIDIndex = SkipList<String, TableRow>(maxLevel: maxLevel, unique: true)
+        nameIndex = SkipList<String, TableRow>(maxLevel: maxLevel)
+        ageIndex = SkipList<Int, TableRow>(maxLevel: maxLevel)
+        studentIDIndex = SkipList<String, TableRow>(maxLevel: maxLevel)
     }
     init(size: Int) {
-        nameIndex = SkipList<String, TableRow>(maxNodes: size, unique: false)
-        ageIndex = SkipList<Int, TableRow>(maxNodes: size, unique: false)
-        studentIDIndex = SkipList<String, TableRow>(maxNodes: size, unique: true)
+        nameIndex = SkipList<String, TableRow>(maxNodes: size)
+        ageIndex = SkipList<Int, TableRow>(maxNodes: size)
+        studentIDIndex = SkipList<String, TableRow>(maxNodes: size)
     }
     func insert(_ name: String, age: Int) -> TableRow {
         // Creating the table row does all the insertion stuff
@@ -46,23 +46,11 @@ class TableRow: SpeedTableRow, Equatable {
     var parent: Table?
     var name: String {
         willSet { _ = parent!.nameIndex.delete(key: name, value: self) }
-        didSet {
-            do {
-                try self.parent!.nameIndex.insert(key: name, value: self)
-            } catch {
-                
-            }
-        }
+        didSet { self.parent!.nameIndex.insert(key: name, value: self) }
     }
     var age: Int {
         willSet { _ = parent!.ageIndex.delete(key: age, value: self) }
-        didSet {
-            do {
-                try self.parent!.ageIndex.insert(key: age, value: self)
-            } catch {
-                
-            }
-        }
+        didSet { self.parent!.ageIndex.insert(key: age, value: self) }
     }
     var school: String? // Unindexed value
     var studentIDStorage: String? // unique optional value
@@ -70,7 +58,12 @@ class TableRow: SpeedTableRow, Equatable {
         return studentIDStorage
     }
     func setStudentID(_ ID: String?) throws {
-        try parent!.studentIDIndex.replace(newKey: ID, keyStore: &studentIDStorage, value: self)
+        if let key = ID {
+            if parent!.studentIDIndex.exists(key: key) {
+                throw SpeedTableError.keyNotUnique(key: key);
+            }
+        }
+        parent!.studentIDIndex.replace(newKey: ID, keyStore: &studentIDStorage, value: self)
     }
     init(parent: Table, name: String, age: Int) {
         self.parent = parent
@@ -78,16 +71,8 @@ class TableRow: SpeedTableRow, Equatable {
         self.age = age
         // This needs to be done explicitly because the willSet/didSet doesn't
         // fire on initialization.
-        do {
-            try parent.nameIndex.insert(key: self.name, value: self)
-        } catch {
-            // can't happen, only reason insert can throw is if it's not unique
-        }
-        do {
-            try parent.ageIndex.insert(key: self.age, value: self)
-        } catch {
-            // can't happen, only reason insert can throw is if it's not unique
-        }
+        parent.nameIndex.insert(key: self.name, value: self)
+        parent.ageIndex.insert(key: self.age, value: self)
     }
     func delete() {
         _ = parent!.nameIndex.delete(key: name, value: self)

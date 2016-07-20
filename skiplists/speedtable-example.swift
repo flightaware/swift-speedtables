@@ -43,14 +43,14 @@ class Table: SpeedTable {
 // Each speedtable requires two classes, one for the table as a whole, one for
 // the row holding the data
 class TableRow: SpeedTableRow, Equatable {
-    var parent: Table?
+    var parent: Table
     var name: String {
-        willSet { parent!.nameIndex.delete(name, value: self) }
-        didSet { parent!.nameIndex.insert(name, value: self) }
+        willSet { parent.nameIndex.delete(name, value: self) }
+        didSet { parent.nameIndex.insert(name, value: self) }
     }
     var age: Int {
-        willSet { parent!.ageIndex.delete(age, value: self) }
-        didSet { parent!.ageIndex.insert(age, value: self) }
+        willSet { parent.ageIndex.delete(age, value: self) }
+        didSet { parent.ageIndex.insert(age, value: self) }
     }
     var school: String? // Unindexed value
     var studentIDStorage: String? // unique optional value
@@ -59,11 +59,11 @@ class TableRow: SpeedTableRow, Equatable {
     }
     func setStudentID(ID: String?) throws {
         if let key = ID {
-            if parent!.studentIDIndex.exists(key) {
+            if parent.studentIDIndex.exists(key) {
                 throw SpeedTableError.KeyNotUnique(key: key)
             }
         }
-        parent!.studentIDIndex.replace(ID, keyStore: &studentIDStorage, value: self)
+        parent.studentIDIndex.replace(ID, keyStore: &studentIDStorage, value: self)
     }
     init(parent: Table, name: String, age: Int) {
         self.parent = parent
@@ -75,12 +75,11 @@ class TableRow: SpeedTableRow, Equatable {
         parent.ageIndex.insert(self.age, value: self)
     }
     func delete() {
-        parent!.nameIndex.delete(name, value: self)
-        parent!.ageIndex.delete(age, value:self)
+        parent.nameIndex.delete(name, value: self)
+        parent.ageIndex.delete(age, value:self)
         if let ID = studentIDStorage {
-            parent!.studentIDIndex.delete(ID, value:self)
+            parent.studentIDIndex.delete(ID, value:self)
         }
-        parent = nil // do not modify a row after it's deleted!
     }
 }
 
@@ -90,3 +89,4 @@ class TableRow: SpeedTableRow, Equatable {
 func ==(lhs: TableRow, rhs: TableRow) -> Bool {
     return lhs === rhs
 }
+

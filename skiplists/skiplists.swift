@@ -30,7 +30,11 @@ class SLNode<Key: Comparable, Value: Equatable> {
     var next: [SLNode<Key, Value>?]
     init(_ key: Key?, value: Value? = nil, maxLevel: Int, level: Int = 0) {
         self.key = key
-        self.values = (value == nil) ? [] : [value!]
+        if let v = value {
+            self.values = [v]
+        } else {
+            self.values = []
+        }
         self.level = (level > 0) ? level : SkipListRandomLevel(maxLevel)
         self.next = Array<SLNode<Key, Value>?>(count: maxLevel, repeatedValue: nil)
     }
@@ -56,22 +60,16 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
         
         // look for the key
         for i in (1 ... self.level).reverse() {
-            while x.next[i-1] != nil && x.next[i-1]!.key < key {
-                x = x.next[i-1]!
+            while let next = x.next[i-1] where next.key < key {
+                x = next
             }
         }
         
-        // have we run off the end?
-        guard x.next[0] != nil else {
-            return nil
-        }
-        
-        return x.next[0]!
+        return x.next[0]
     }
     
     public func search(greaterThanOrEqualTo key: Key) -> [Value] {
-        let x: SLNode<Key, Value>? = search(greaterThanOrEqualTo: key)
-        if let array = x?.values {
+        if let array = search(greaterThanOrEqualTo: key)?.values {
             return array
         } else {
             return []
@@ -79,10 +77,8 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
     }
     
     func search(equalTo key: Key) -> SLNode<Key, Value>? {
-        let x: SLNode<Key, Value>? = search(greaterThanOrEqualTo: key)
-
         // Check for an exact match
-        if x != nil && x!.key == key {
+        if let x: SLNode<Key, Value> = search(greaterThanOrEqualTo: key) where x.key == key {
             return x
         } else {
             return nil
@@ -95,16 +91,14 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
     }
     
     public func exists(key: Key, value: Value) -> Bool {
-        let x: SLNode<Key, Value>? = search(equalTo: key)
-        if let array = x?.values {
+        if let array = search(equalTo: key)?.values {
             return array.contains(value)
         }
         return false;
     }
     
     public func search(equalTo key: Key) -> [Value] {
-        let x: SLNode<Key, Value>? = search(equalTo: key)
-        if let array = x?.values {
+        if let array = search(equalTo: key)?.values {
             return array
         } else {
             return []
@@ -149,16 +143,16 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
         // look for the key, and save the previous nodes all the way down in the update[] list
         i = self.level
         while i >= 1 {
-            while x.next[i-1] != nil && x.next[i-1]!.key < key {
-                x = x.next[i-1]!
+            while let next = x.next[i-1] where next.key < key {
+                x = next
             }
             update[i-1] = x
             i -= 1
         }
         
         // If we haven't run off the end...
-        if x.next[0] != nil {
-            x = x.next[0]!
+        if let next = x.next[0]  {
+            x = next
             
             // If we're looking at the right key already, then there's nothing to insert. Just add
             // the new value to the values array.
@@ -201,20 +195,20 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
         // look for the key, and save the previous nodes all the way down in the update[] list
         i = self.level
         while i >= 1 {
-            while x.next[i-1] != nil && x.next[i-1]!.key < key {
-                x = x.next[i-1]!
+            while let next = x.next[i-1] where next.key < key {
+                x = next
             }
             update[i-1] = x
             i -= 1
         }
         
-        // check if run off end of list, nothing to do
-        guard x.next[0] != nil else {
+        // check if run off end of list, nothing to do,
+        guard let next = x.next[0] else {
             return false
         }
         
         // Point to the node we're maybe going to delete, if it matches
-        x = x.next[0]!
+        x = next
         
         // Look for a key match
         if x.key != key {
@@ -222,15 +216,13 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
         }
         
         // look for match in values
-        let foundIndex = x.values.indexOf(value)
-        
-        // If we didn't find a matching value, we didn't actually find a match
-        if(foundIndex == nil) {
+        guard let foundIndex = x.values.indexOf(value) else {
+            // If we didn't find a matching value, we didn't actually find a match
             return false
         }
         
         // Remove the value we found, and if it wasn't the last one return success
-        x.values.removeAtIndex(foundIndex!)
+        x.values.removeAtIndex(foundIndex)
         if(x.values.count > 0) {
             return true
         }
@@ -240,7 +232,7 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
         // point all the previous node to the new next node
         i = 1
         while i <= self.level {
-            if update[i-1]!.next[i-1] != nil && update[i-1]!.next[i-1]! !== x {
+            if update[i-1]!.next[i-1] != nil && update[i-1]!.next[i-1] !== x {
                 break
             }
             update[i-1]!.next[i-1] = x.next[i-1]
@@ -263,8 +255,8 @@ public class SkipList<Key: Comparable, Value: Equatable>: SequenceType {
         return AnyGenerator<(Key, Value)> {
             if index < 0 || index >= row.values.count {
                 repeat {
-                    guard row.next[0] != nil else { return nil }
-                    row = row.next[0]!
+                    guard let next = row.next[0] else { return nil }
+                    row = next
                 } while row.values.count == 0
                 index = 0
             }

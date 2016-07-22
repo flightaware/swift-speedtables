@@ -56,7 +56,10 @@ public class Query<Key: Comparable, Value: Equatable>: Sequence {
         state.index += 1
         
         // if we've stepped past the current node's values, keep stepping until we get a node with values
-        while let node = state.node where state.index >= node.values.count {
+        while
+            let node = state.node,
+            state.index >= node.values.count
+        {
             state.node = node.next[0]
             state.index = 0
         }

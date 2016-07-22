@@ -60,7 +60,10 @@ public class SkipList<Key: Comparable, Value: Equatable>: Sequence {
         
         // look for the key
         for i in (1 ... self.level).reversed() {
-            while let next = x.next[i-1] where next.key < key {
+            while
+                let next = x.next[i-1],
+                next.key < key
+            {
                 x = next
             }
         }
@@ -78,7 +81,7 @@ public class SkipList<Key: Comparable, Value: Equatable>: Sequence {
     
     func search(equalTo key: Key) -> SLNode<Key, Value>? {
         // Check for an exact match
-        if let x: SLNode<Key, Value> = search(greaterThanOrEqualTo: key) where x.key == key {
+        if let x: SLNode<Key, Value> = search(greaterThanOrEqualTo: key), x.key == key {
             return x
         } else {
             return nil
@@ -143,7 +146,10 @@ public class SkipList<Key: Comparable, Value: Equatable>: Sequence {
         // look for the key, and save the previous nodes all the way down in the update[] list
         i = self.level
         while i >= 1 {
-            while let next = x.next[i-1] where next.key < key {
+            while
+                let next = x.next[i-1],
+                next.key < key
+            {
                 x = next
             }
             update[i-1] = x
@@ -195,7 +201,10 @@ public class SkipList<Key: Comparable, Value: Equatable>: Sequence {
         // look for the key, and save the previous nodes all the way down in the update[] list
         i = self.level
         while i >= 1 {
-            while let next = x.next[i-1] where next.key < key {
+            while
+                let next = x.next[i-1],
+                next.key < key
+            {
                 x = next
             }
             update[i-1] = x

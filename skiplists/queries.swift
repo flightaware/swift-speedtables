@@ -38,13 +38,13 @@ public class Query<Key: Comparable, Value: Equatable>: Sequence {
     private func start() -> QueryState<Key, Value> {
         var node: SLNode<Key, Value>?
 
-        if minKey == nil {
-            node = list.head.next[0]
-        } else {
-            node = list.search(greaterThanOrEqualTo: minKey!)
+        if let minKey = self.minKey {
+            node = list.search(greaterThanOrEqualTo: minKey)
             if node != nil && minEqual == false && node!.key == minKey {
                 node = node!.next[0]
             }
+        } else {
+            node = list.head.next[0]
         }
         return QueryState<Key, Value>(node: node)
     }
@@ -56,23 +56,23 @@ public class Query<Key: Comparable, Value: Equatable>: Sequence {
         state.index += 1
         
         // if we've stepped past the current node's values, keep stepping until we get a node with values
-        while state.node != nil && state.index >= state.node!.values.count {
-            state.node = state.node!.next[0]
+        while let node = state.node where state.index >= node.values.count {
+            state.node = node.next[0]
             state.index = 0
         }
         
         // if you ran out of nodes, our work is done
-        if state.node == nil { return }
+        guard let node = state.node else { return }
         
         // If there's no max, our work is done
         if maxKey == nil { return }
         
         if maxEqual {
-            if maxKey < state.node!.key {
+            if maxKey < node.key {
                 state.node = nil
             }
         } else {
-            if maxKey <= state.node!.key {
+            if maxKey <= node.key {
                 state.node = nil
             }
         }
@@ -90,9 +90,9 @@ public class Query<Key: Comparable, Value: Equatable>: Sequence {
     public func next() -> (Key, Value)? {
         step(state: &state)
         
-        guard state.node != nil else { return nil }
+        guard let node = state.node else { return nil }
         
-        return (state.node!.key!, state.node!.values[state.index])
+        return (node.key!, node.values[state.index])
     }
     
     public func makeIterator() -> AnyIterator<(Key, Value)> {
@@ -101,9 +101,9 @@ public class Query<Key: Comparable, Value: Equatable>: Sequence {
         return AnyIterator<(Key, Value)> {
             self.step(state: &state)
             
-            guard state.node != nil else { return nil }
+            guard let node = state.node else { return nil }
             
-            return (state.node!.key!, state.node!.values[state.index])
+            return (node.key!, node.values[state.index])
         }
     }
 }

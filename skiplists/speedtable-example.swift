@@ -43,14 +43,14 @@ class Table: SpeedTable {
 // Each speedtable requires two classes, one for the table as a whole, one for
 // the row holding the data
 class TableRow: SpeedTableRow, Equatable {
-    var parent: Table?
+    var parent: Table
     var name: String {
-        willSet { _ = parent!.nameIndex.delete(key: name, value: self) }
-        didSet { self.parent!.nameIndex.insert(key: name, value: self) }
+        willSet { _ = parent.nameIndex.delete(key: name, value: self) }
+        didSet { self.parent.nameIndex.insert(key: name, value: self) }
     }
     var age: Int {
-        willSet { _ = parent!.ageIndex.delete(key: age, value: self) }
-        didSet { self.parent!.ageIndex.insert(key: age, value: self) }
+        willSet { _ = parent.ageIndex.delete(key: age, value: self) }
+        didSet { self.parent.ageIndex.insert(key: age, value: self) }
     }
     var school: String? // Unindexed value
     var studentIDStorage: String? // unique optional value
@@ -59,11 +59,11 @@ class TableRow: SpeedTableRow, Equatable {
     }
     func setStudentID(_ ID: String?) throws {
         if let key = ID {
-            if parent!.studentIDIndex.exists(key: key) {
+            if parent.studentIDIndex.exists(key: key) {
                 throw SpeedTableError.keyNotUnique(key: key);
             }
         }
-        parent!.studentIDIndex.replace(newKey: ID, keyStore: &studentIDStorage, value: self)
+        parent.studentIDIndex.replace(newKey: ID, keyStore: &studentIDStorage, value: self)
     }
     init(parent: Table, name: String, age: Int) {
         self.parent = parent
@@ -75,12 +75,11 @@ class TableRow: SpeedTableRow, Equatable {
         parent.ageIndex.insert(key: self.age, value: self)
     }
     func delete() {
-        _ = parent!.nameIndex.delete(key: name, value: self)
-        _ = parent!.ageIndex.delete(key: age, value:self)
+        _ = parent.nameIndex.delete(key: name, value: self)
+        _ = parent.ageIndex.delete(key: age, value:self)
         if let ID = studentIDStorage {
-            _ = parent!.studentIDIndex.delete(key: ID, value:self)
+            _ = parent.studentIDIndex.delete(key: ID, value:self)
         }
-        parent = nil // do not modify a row after it's deleted!
     }
 }
 

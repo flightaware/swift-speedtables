@@ -38,13 +38,13 @@ public class Query<Key: Comparable, Value: Equatable>: SequenceType {
     private func start() -> QueryState<Key, Value> {
         var node: SLNode<Key, Value>?
 
-        if min == nil {
-            node = list.head.next[0]
-        } else {
-            node = list.search(greaterThanOrEqualTo: min!)
+        if let min = self.min {
+            node = list.search(greaterThanOrEqualTo: min)
             if node != nil && minEqual == false && node!.key == min {
                 node = node!.next[0]
             }
+        } else {
+            node = list.head.next[0]
         }
         return QueryState<Key, Value>(node: node)
     }
@@ -62,17 +62,17 @@ public class Query<Key: Comparable, Value: Equatable>: SequenceType {
         }
         
         // if you ran out of nodes, our work is done
-        if state.node == nil { return }
+        guard let node = state.node else { return }
         
         // If there's no max, our work is done
         if max == nil { return }
         
         if maxEqual {
-            if max < state.node!.key {
+            if max < node.key {
                 state.node = nil
             }
         } else {
-            if max <= state.node!.key {
+            if max <= node.key {
                 state.node = nil
             }
         }
@@ -90,9 +90,9 @@ public class Query<Key: Comparable, Value: Equatable>: SequenceType {
     public func next() -> (Key, Value)? {
         step(&state)
         
-        guard state.node != nil else { return nil }
+        guard let node = state.node else { return nil }
         
-        return (state.node!.key!, state.node!.values[state.index])
+        return (node.key!, node.values[state.index])
     }
     
     public func generate() -> AnyGenerator<(Key, Value)> {
@@ -101,9 +101,9 @@ public class Query<Key: Comparable, Value: Equatable>: SequenceType {
         return AnyGenerator<(Key, Value)> {
             self.step(&state)
             
-            guard state.node != nil else { return nil }
+            guard let node = state.node else { return nil }
             
-            return (state.node!.key!, state.node!.values[state.index])
+            return (node.key!, node.values[state.index])
         }
     }
 }

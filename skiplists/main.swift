@@ -181,7 +181,7 @@ for (key, row) in t.studentIDIndex {
 }
 
 print("\nSpeed test")
-let letters = Array("ABCDEFGHIJKLMNOPQRSTUVWXYZ".characters).map {String($0)}
+let letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".characters.map {String($0)}
 
 func randomString(length: Int = 6) -> String {
     var string = ""

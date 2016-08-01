@@ -181,8 +181,9 @@ for (key, row) in t.studentIDIndex {
 }
 
 print("\nSpeed test")
+let letters = Array("ABCDEFGHIJKLMNOPQRSTUVWXYZ".characters).map {String($0)}
+
 func randomString(length: Int = 6) -> String {
-    let letters = ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"]
     var string = ""
     for _ in 0..<length {
         let j = Int(drand48() * 26)

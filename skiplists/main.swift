@@ -181,13 +181,15 @@ for (key, row) in t.studentIDIndex {
 }
 
 print("\nSpeed test")
-let letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".characters.map {String($0)}
 
 func randomString(length: Int = 6) -> String {
+    struct Statics {
+        static let letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".characters.map {String($0)}
+    }
     var string = ""
     for _ in 0..<length {
         let j = Int(drand48() * 26)
-        string += letters[j]
+        string += Statics.letters[j]
     }
     return string
 }

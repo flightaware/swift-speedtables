@@ -183,7 +183,7 @@ for (key, row) in t.studentIDIndex {
 print("\nSpeed test")
 
 func randomString(length: Int = 6) -> String {
-    struct Statics {
+    enum Statics {
         static let letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".characters.map {String($0)}
     }
     var string = ""

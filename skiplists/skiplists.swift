@@ -62,7 +62,8 @@ public class SkipList<Key: Comparable, Value: Equatable>: Sequence {
         for i in (1 ... self.level).reversed() {
             while
                 let next = x.next[i-1],
-                next.key < key
+                let nextKey = next.key,
+                nextKey < key
             {
                 x = next
             }
@@ -148,7 +149,8 @@ public class SkipList<Key: Comparable, Value: Equatable>: Sequence {
         while i >= 1 {
             while
                 let next = x.next[i-1],
-                next.key < key
+                let nextKey = next.key,
+                nextKey < key
             {
                 x = next
             }
@@ -203,7 +205,8 @@ public class SkipList<Key: Comparable, Value: Equatable>: Sequence {
         while i >= 1 {
             while
                 let next = x.next[i-1],
-                next.key < key
+                let nextKey = next.key,
+                nextKey < key
             {
                 x = next
             }

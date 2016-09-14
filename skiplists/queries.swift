@@ -12,7 +12,7 @@ private struct QueryState<Key: Comparable, Value: Equatable> {
     var node: SLNode<Key, Value>? = nil
     var index: Int = -1
     
-    private init(node: SLNode<Key, Value>?) {
+    init(node: SLNode<Key, Value>?) {
         self.node = node
         self.index = -1
     }
@@ -67,16 +67,19 @@ public class Query<Key: Comparable, Value: Equatable>: Sequence {
         // if you ran out of nodes, our work is done
         guard let node = state.node else { return }
         
-        // If there's no max, our work is done
-        if maxKey == nil { return }
-        
-        if maxEqual {
-            if maxKey < node.key {
-                state.node = nil
-            }
-        } else {
-            if maxKey <= node.key {
-                state.node = nil
+        if
+            let maxKey = maxKey,
+            let thisKey = node.key
+        {
+            // If there's a max, and we've hit it, we're done
+            if maxEqual {
+                if maxKey < thisKey {
+                    state.node = nil
+                }
+            } else {
+                if maxKey <= thisKey {
+                    state.node = nil
+                }
             }
         }
     }

@@ -15,6 +15,6 @@ protocol SpeedTableRow {
 }
 
 // Skiplist errors
-public enum SpeedTableError<Key>: ErrorProtocol {
+public enum SpeedTableError<Key>: Error {
     case keyNotUnique(key: Key)
 }

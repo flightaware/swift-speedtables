@@ -9,10 +9,12 @@
 import Foundation
 
 let randomProbability = 0.5
+let randomProbabilityUInt32 = UInt32(randomProbability * Double(UInt32.max))
+let pcg = pcg32()
 
 func SkipListRandomLevel(maxLevel: Int) -> Int {
     var newLevel = 1
-    while drand48() < randomProbability && newLevel < maxLevel {
+    while pcg.next() < randomProbabilityUInt32 && newLevel < maxLevel {
         newLevel += 1
     }
     return newLevel

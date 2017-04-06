@@ -173,7 +173,7 @@ for row in rows {
 }
 print("Final entries")
 for (key, row) in t.nameIndex {
-    print("Name: \(key), Age: \(row.age), ID: \(row.getStudentID())")
+    print("Name: \(key), Age: \(row.age), ID: \(row.getStudentID() ?? "Unknown")")
 }
 print("Final student IDs")
 for (key, row) in t.studentIDIndex {
